@@ -1,12 +1,3 @@
-INSANE PORTFOLIO IDEA WITH SELFHOSTED CUSTOM MADE BACKEND
-
-==========================================================================================
-
-things i need:
-  uploading images
-    image uploader that supports cropping
-  rearranging image grid
-
 ⠀⠀⢸⡿⢦⣄⠀⢀⣠⣴⣶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠘⣷⠀⠉⠛⠛⠉⢰⡇⠀⠀⠘⣷⣦⣾⡇⠀⠀⠀⠀⠀⠀⠀
 ⠀⢀⣰⠿⠀⠀⠀⠀⠀⢿⡁⠀⢀⣴⣿⣿⣿⣶⡄⠀⠀⠀⠀⠀⠀
