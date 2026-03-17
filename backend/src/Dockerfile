@@ -7,7 +7,8 @@ RUN pacman -S --noconfirm --disable-sandbox \
   gcc \
   pkg-config \
   zlib \
-  imagemagick
+  imagemagick \
+  libheif
 
 # working directory inside container
 WORKDIR /app

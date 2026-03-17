@@ -13,6 +13,7 @@ import (
 
 const (
 	UPLOAD_FIELD_NAME = "image"
+	UPLOAD_DIR        = "/uploads"
 	MAX_FORM_SIZE     = 32000000 // 32 mb upload limit; parsemultipartform takes bytes
 )
 
@@ -109,7 +110,7 @@ func UploadHandler(w http.ResponseWriter, req *http.Request) {
 		/* ( modeperm = full read, write + execute perms; same as chmod 777 )
 		remember that executing a dir = opening it ) */
 
-		err = os.MkdirAll("./uploads", os.ModePerm)
+		err = os.MkdirAll(UPLOAD_DIR, os.ModePerm)
 		if err != nil {
 			errNew = err.Error()
 			httpStatus = http.StatusInternalServerError
@@ -118,7 +119,7 @@ func UploadHandler(w http.ResponseWriter, req *http.Request) {
 
 		// CREATE THE IMAGE FILE
 
-		imgFile, err := os.Create(fmt.Sprintf("./uploads/%d%s", time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
+		imgFile, err := os.Create(fmt.Sprintf("%s/%d%s", UPLOAD_DIR, time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
 		if err != nil {
 			errNew = err.Error()
 			httpStatus = http.StatusBadRequest // FIXME: why bad request here? ( i think should be internal server error )
