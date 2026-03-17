@@ -33,6 +33,9 @@ mebibytes?
 go.sum?
 layer caching?
 pkgconfig?
+lanczos filtering?
+imagemagick extents?
+  ( understand the calculations being done in processing.go:33 )
 
 === LEARNING NOTES =======================================================================
 
