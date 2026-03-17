@@ -1,10 +1,9 @@
-package main
+package heicupload
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,13 +11,12 @@ import (
 )
 
 const (
-	PORT              = ":8080"
 	UPLOAD_FIELD_NAME = "image"
 	MAX_FORM_SIZE     = 32000000 // 32 mb upload limit; parsemultipartform takes bytes
 )
 
 // Used to check for heartbeat
-func pingHandler(w http.ResponseWriter, req *http.Request) {
+func PingHandler(w http.ResponseWriter, req *http.Request) {
 	resp := map[string]interface{}{ // [keyType]valueType; empty interface = any type
 		"messageType": "S",
 		"message":     "",
@@ -32,7 +30,7 @@ func pingHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // Handles image uploads
-func uploadHandler(w http.ResponseWriter, req *http.Request) {
+func UploadHandler(w http.ResponseWriter, req *http.Request) {
 
 	// CHECK FOR FORM PARSING ERRORS
 
@@ -151,14 +149,4 @@ func uploadHandler(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(httpStatus)
 
 	json.NewEncoder(w).Encode(resp)
-}
-
-func main() {
-
-	http.HandleFunc("/ping", pingHandler)
-	http.HandleFunc("/upload", uploadHandler)
-
-	fmt.Printf("Launching server on port %s...\n", PORT)
-
-	log.Fatal(http.ListenAndServe(PORT, nil)) // listenandserve always returns non nil err
 }

@@ -1,0 +1,6 @@
+# ignore test drawing dirs
+**drawings/
+**drawings-converted/
+
+# ignore uploads dir (created by service on volume mount)
+**uploads/
