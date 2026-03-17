@@ -4,3 +4,6 @@
 
 # ignore uploads dir (created by service on volume mount)
 **uploads/
+
+# ignore heic files
+**/*.heic

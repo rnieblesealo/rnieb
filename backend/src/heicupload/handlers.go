@@ -3,6 +3,7 @@ package heicupload
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gabriel-vasile/mimetype"
 	"io"
 	"net/http"
 	"os"
@@ -44,7 +45,7 @@ func UploadHandler(w http.ResponseWriter, req *http.Request) {
 
 	files := req.MultipartForm.File[UPLOAD_FIELD_NAME]
 
-	fmt.Printf("LENGTH: %d\n", len(files))
+	fmt.Printf("Images received: %d\n", len(files))
 
 	var errNew string = ""
 	var httpStatus int = 0
@@ -77,11 +78,20 @@ func UploadHandler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		// CHECK THE CONTENT TYPE
-		/* ( we only want images of png or jpg type ) */
+		/* ( we only want images of heic, png, or jpg type ) */
 
-		fileType := http.DetectContentType(buf)
-		if fileType != "image/png" && fileType != "image/jpg" {
-			errNew = "The provided file format is not allowed."
+		fileMimeType := mimetype.Detect(buf).String()
+
+		fmt.Printf("Detected filetype for %s: %s\n", fileHeader.Filename, fileMimeType)
+
+		allowedMimeTypes := []string{
+			"image/png",
+			"image/jpg",
+			"image/heic",
+		}
+
+		if !mimetype.EqualsAny(fileMimeType, allowedMimeTypes...) {
+			errNew = "Uploaded image must be PNG, JPG, or HEIC"
 			httpStatus = http.StatusBadRequest
 			break
 		}
@@ -123,6 +133,11 @@ func UploadHandler(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			errNew = err.Error()
 			httpStatus = http.StatusBadRequest // FIXME: also why bad request here? same suggestion as above
+		}
+
+		// CONVERT THE IMAGE IF IN HEIC FORMAT
+		if fileMimeType == "image/heic" {
+			HEICToPNG(imgFile.Name())
 		}
 	}
 
