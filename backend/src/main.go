@@ -17,11 +17,16 @@ const (
 // Allows any origin to access this; effectively we're a public API
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*") // fix cors
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		next.ServeHTTP(w, r)
 	})
 }
-
 func main() {
 	// Initialize ImageMagick
 	/* Must be done once; C API */
@@ -37,6 +42,7 @@ func main() {
 	// Setup fetch handlers
 
 	http.HandleFunc("/get-drawings", fetch.GetDrawings)
+	http.HandleFunc("/delete-drawing", fetch.DeleteDrawing)
 
 	// Setup image fileserver
 

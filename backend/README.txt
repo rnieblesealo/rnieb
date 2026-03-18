@@ -52,6 +52,9 @@ returns JSON STRUCT WITH MESSAGE on success
 
   -----> decided to use standardized response always
 
+we are opening/closing DB a lot of times...
+  should we just repass one connection started once?
+
 === QUESTIONS ============================================================================
 
 [x] multipart forms?

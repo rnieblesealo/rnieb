@@ -3,9 +3,11 @@ package fetch
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"net/http"
+	"os"
 	"rnieb/common"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Drawing struct {
@@ -70,6 +72,72 @@ func GetDrawings(w http.ResponseWriter, r *http.Request) {
 		w,
 		"Successfully retrieved drawings",
 		drawings,
+		http.StatusOK,
+	)
+}
+
+// Deletes a drawing and its file
+func DeleteDrawing(w http.ResponseWriter, req *http.Request) {
+	db, err := sql.Open("sqlite3", "./rnieb.db")
+	if err != nil {
+		common.RNRespond(
+			w,
+			fmt.Sprintf("Failed to connect to DB: %s", err),
+			nil,
+			http.StatusInternalServerError)
+
+		return
+	}
+	defer db.Close()
+
+	// Get the deletion ID from URL params
+
+	deletionID := req.URL.Query().Get("id") // Get deletion ID query param
+
+	// Get the path of the image we want to delete
+
+	var deletionImagePath string
+	db.QueryRow(`
+		SELECT path
+		FROM drawings
+		WHERE id = ?
+		`, deletionID).Scan(&deletionImagePath) // NOTE: Only db.Query requires closing
+
+	// Delete the image from the filesystem
+
+	err = os.Remove(deletionImagePath)
+	if err != nil {
+		common.RNRespond(
+			w,
+			fmt.Sprintf("Failed to delete image (location %s): %s", deletionImagePath, err),
+			nil,
+			http.StatusInternalServerError)
+
+		return
+	}
+
+	// Delete the record from the DB
+
+	_, err = db.Exec(`
+		DELETE FROM drawings WHERE id = ?	
+	`, deletionID)
+	if err != nil {
+		common.RNRespond(
+			w,
+			fmt.Sprintf("Failed to delete record (ID %s): %s", deletionID, err),
+			nil,
+			http.StatusInternalServerError)
+
+		return
+	}
+
+	common.RNRespond(
+		w,
+		fmt.Sprintf(
+			"Successfully deleted ID %s with image %s",
+			deletionID,
+			deletionImagePath),
+		nil,
 		http.StatusOK,
 	)
 }
