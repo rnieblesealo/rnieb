@@ -1,6 +1,11 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 
+interface GetDrawingsResponse {
+  message: string,
+  data: Drawing[]
+}
+
 interface Drawing {
   id: string,
   name: string,
@@ -46,7 +51,8 @@ const Collage = () => {
   useEffect(() => {
     axios.get("http://localhost:8080/get-drawings")
       .then(res => {
-        setDrawings(res.data)
+        const getDrawingsResponse: GetDrawingsResponse = res.data
+        setDrawings(getDrawingsResponse.data)
       })
       .catch(err => {
         console.error("Failed to fetch images:", err)

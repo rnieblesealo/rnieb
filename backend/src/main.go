@@ -34,8 +34,6 @@ func main() {
 	http.HandleFunc("/upload", upload.Upload)
 
 	// setup image fetch handlers
-	http.HandleFunc("/list-images", fetch.ListImages) // WARNING: use get-drawings!
-
 	http.HandleFunc("/get-drawings", fetch.GetDrawings)
 
 	/* set up a fileserver that will look for an image filename inside /uploads

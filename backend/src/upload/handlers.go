@@ -2,7 +2,6 @@ package upload
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"github.com/gabriel-vasile/mimetype"
 	_ "github.com/mattn/go-sqlite3"
@@ -10,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"rnieb/common"
 	"time"
 )
 
@@ -23,26 +23,9 @@ const (
 	MAX_FORM_SIZE = 32 << 20 // 32mb upload limit; converting to mebi with shift!
 )
 
-type RNResponse struct {
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-}
-
-func RNRespond(w http.ResponseWriter, message string, data interface{}, httpStatus int) {
-	resp := RNResponse{
-		Message: message,
-		Data:    data,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(httpStatus)
-
-	json.NewEncoder(w).Encode(resp)
-}
-
 // Check for heartbeat
 func Ping(w http.ResponseWriter, req *http.Request) {
-	RNRespond(w, "Polo!", nil, http.StatusOK)
+	common.RNRespond(w, "Polo!", nil, http.StatusOK)
 }
 
 // Handles image uploads
@@ -51,7 +34,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 
 	err := req.ParseMultipartForm(MAX_FORM_SIZE)
 	if err != nil {
-		RNRespond(w, fmt.Sprintf("Failed to parse form: %s", err), nil, http.StatusBadRequest)
+		common.RNRespond(w, fmt.Sprintf("Failed to parse form: %s", err), nil, http.StatusBadRequest)
 		return
 	}
 
@@ -62,7 +45,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 
 	_, imageFileHandle, err := req.FormFile("file")
 	if err != nil {
-		RNRespond(
+		common.RNRespond(
 			w,
 			fmt.Sprintf("Failed to obtain image file: %s", err),
 			nil,
@@ -75,7 +58,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 
 	file, err := imageFileHandle.Open()
 	if err != nil {
-		RNRespond(
+		common.RNRespond(
 			w,
 			fmt.Sprintf("Failed to open image file: %s", err),
 			nil,
@@ -91,7 +74,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 	buf := make([]byte, 512)
 	_, err = file.Read(buf)
 	if err != nil {
-		RNRespond(
+		common.RNRespond(
 			w,
 			fmt.Sprintf("Failed to read image file: %s", err),
 			nil,
@@ -111,7 +94,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 
 	mimeType := mimetype.Detect(buf).String()
 	if !mimetype.EqualsAny(mimeType, allowedMimeTypes...) {
-		RNRespond(w, "Uploaded image must be PNG, JPG or HEIC", nil, http.StatusBadRequest)
+		common.RNRespond(w, "Uploaded image must be PNG, JPG or HEIC", nil, http.StatusBadRequest)
 		return
 	}
 
@@ -119,7 +102,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 
 	_, err = file.Seek(0, io.SeekStart)
 	if err != nil {
-		RNRespond(
+		common.RNRespond(
 			w,
 			fmt.Sprintf("Failed to seek: %s", err),
 			nil,
@@ -132,7 +115,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 
 	err = os.MkdirAll(UPLOAD_DIR, os.ModePerm)
 	if err != nil {
-		RNRespond(
+		common.RNRespond(
 			w,
 			fmt.Sprintf("Failed to create uploads dir: %s", err),
 			nil,
@@ -153,7 +136,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 	imageFile, err := os.Create(imageFilepath)
 
 	if err != nil {
-		RNRespond(
+		common.RNRespond(
 			w,
 			fmt.Sprintf("Failed to create image file: %s", err),
 			nil,
@@ -167,7 +150,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 
 	_, err = io.Copy(imageFile, file)
 	if err != nil {
-		RNRespond(
+		common.RNRespond(
 			w,
 			fmt.Sprintf("Failed to write image file contents: %s", err),
 			nil,
@@ -187,7 +170,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 		// If did not already upload PNG, perform conversion
 		pngImageFilepath, err = ConvertToPNG(imageFile.Name())
 		if err != nil {
-			RNRespond(
+			common.RNRespond(
 				w,
 				fmt.Sprintf("Failed to convert image to PNG: %s", err),
 				nil,
@@ -206,7 +189,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 
 	db, err := sql.Open("sqlite3", "./rnieb.db") // Open DB connection
 	if err != nil {
-		RNRespond(
+		common.RNRespond(
 			w,
 			fmt.Sprintf("Failed to connect to DB: %s", err),
 			nil,
@@ -222,7 +205,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 			VALUES (?, ?, ?)	
 	`, imageName, imageDescription, pngImageFilepath) // Run insertion query
 	if err != nil {
-		RNRespond(
+		common.RNRespond(
 			w,
 			fmt.Sprintf("Failed to insert image into DB: %s", err),
 			nil,
@@ -233,7 +216,7 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 
 	// Respond successfully
 
-	RNRespond(
+	common.RNRespond(
 		w,
 		fmt.Sprintf("Successfully uploaded and processed %s", pngImageFilepath),
 		nil,

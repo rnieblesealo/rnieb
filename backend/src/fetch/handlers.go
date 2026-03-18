@@ -2,57 +2,57 @@ package fetch
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"net/http"
-	"os"
+	"rnieb/common"
 )
 
-// TODO: structure the responses similarly to other http
-
-func ListImages(w http.ResponseWriter, r *http.Request) {
-	dirEntries, err := os.ReadDir("/uploads")
-	if err != nil {
-		fmt.Printf("ListImages: %s\n", err.Error())
-		return
-	}
-
-	var names []string
-	for _, dirEntry := range dirEntries {
-		names = append(names, dirEntry.Name())
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	json.NewEncoder(w).Encode(names)
+type Drawing struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Path        string `json:"path"`
 }
 
 func GetDrawings(w http.ResponseWriter, r *http.Request) {
-	// connect to db
+	// Connect to DB
+
 	db, err := sql.Open("sqlite3", "./rnieb.db")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		common.RNRespond(
+			w,
+			fmt.Sprintf("Failed to connect to DB: %s", err),
+			nil,
+			http.StatusInternalServerError,
+		)
+
 		return
 	}
 	defer db.Close()
 
-	// query for drawings rows
+	// Query for all rows of drawings table
+	/* Only include the id, name, description and path, no need for creation date */
+
 	rows, err := db.Query(`
 			SELECT id, name, description, path FROM drawings
 	`)
-	defer rows.Close() // query results are kept open as a cursor (?); we must close
+	if err != nil {
+		common.RNRespond(
+			w,
+			fmt.Sprintf("Drawings query error: %s", err),
+			nil,
+			http.StatusInternalServerError,
+		)
 
-	// marshal list of drawings using a go type
-	type Drawing struct {
-		ID          int    `json:"id"`
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		Path        string `json:"path"`
+		return
 	}
+	defer rows.Close() // Query results are kept open; we must close them
+
+	// Marshal list of drawings using a go type
 
 	var drawings []Drawing
+
 	for rows.Next() {
 		var drawing Drawing
 
@@ -61,13 +61,15 @@ func GetDrawings(w http.ResponseWriter, r *http.Request) {
 			&drawing.Name,
 			&drawing.Description,
 			&drawing.Path,
-		)
-		// values are scanned into go type that resembles the db's closest
+		) // Values are scanned into Go with closest type to the DB's
 
 		drawings = append(drawings, drawing)
 	}
 
-	// send json back
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(drawings)
+	common.RNRespond(
+		w,
+		"Successfully retrieved drawings",
+		drawings,
+		http.StatusOK,
+	)
 }
