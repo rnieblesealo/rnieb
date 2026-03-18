@@ -25,51 +25,81 @@ for now this only consists of an image processing service:
 3. server imagemagicks it to convert to jpeg + compress ( heic is huge! ) 
 4. image is secured + displayed on frontend 
 
+we will also resize the image such that its width is always 500 ( for storage purposes )
+  no need to crop it to square with magick 
+  ( we can non-destructively do this in frontend w/styling )
+
+  e.g start as 1280 x 600
+
+      1280 / 600 = 2.1333 aspect
+
+	    resize relative to width:
+
+	    target width / actual width = conv factor
+      500/1280 = 0.390625
+      
+      1280 * 0.390625 = 500 
+      600  * 0.390625 = 234.375
+
+      new dimensions = 500 x 234     
+        ( take floor of decimals; handled in int conversion  )
+
+      500 / 234 = 2.1333 which matches original aspect!
+
 === QUESTIONS ============================================================================
 
-multipart forms?
-what are fileheaders?
-mebibytes?
-go.sum?
-layer caching?
-pkgconfig?
-lanczos filtering?
-imagemagick extents?
-  ( understand the calculations being done in processing.go:33 )
+[ ] multipart forms?
+[ ] what are fileheaders?
+[ ] mebibytes?
+[ ] go.sum?
+[ ] layer caching?
+[ ] pkgconfig?
+[ ] lanczos filtering?
+[ ] imagemagick extents?
+[ ]   ( understand the calculations being done in processing.go:33 )
+[ ] cors?
 
 === LEARNING NOTES =======================================================================
 
 --- HOMEBREW -----------------------------------------------------------------------------
 
-  * brew install --cask <--- homebrew-cask is an extension for gui apps
-  * init() function is like main() but for go modules; runs on import 
-    don't use this to defer cleanups!
+* brew install --cask <--- homebrew-cask is an extension for gui apps
+* init() function is like main() but for go modules; runs on import 
+  don't use this to defer cleanups!
 
 --- DOCKER -------------------------------------------------------------------------------
 
-  * docker image = blueprint
-           container = running instance of image
-           dockerfile extends on blueprint image to add our stuff
-  * docker volume mount allows easy devcontainering:
-    $ docker run -it -v $(pwd):/app rnieb-backend bash
-                        -----------
-                        ^host  ^container
-  * ^C'ing out of container wipes filesystem changes not in dockerfile
-    ( container fs is ephemeral )
-  * container port needs to be exposed if we want to use it normally:
-    $ docker run -p 8080:8080 -it -v $(pwd):/app rnieb-backend bash 
-                 ------------
-                    ^host ^container
-  * docker build runs EVERYTHING except CMD directive
-  * docker run DOES run the CMD directive if no other command is specified
-    e.g.
-        docker run rnieb-backend      <---- will run the CMD in dockerfile
-        docker run rnieb-backend bash <---- will override CMD and run the shell instead
+* docker image = blueprint
+         container = running instance of image
+         dockerfile extends on blueprint image to add our stuff
+* docker volume mount allows easy devcontainering:
+  $ docker run -it -v $(pwd):/app rnieb-backend bash
+                      -----------
+                      ^host  ^container
+* ^C'ing out of container wipes filesystem changes not in dockerfile
+  ( container fs is ephemeral )
+* container port needs to be exposed if we want to use it normally:
+  $ docker run -p 8080:8080 -it -v $(pwd):/app rnieb-backend bash 
+               ------------
+                  ^host ^container
+* docker build runs EVERYTHING except CMD directive
+* docker run DOES run the CMD directive if no other command is specified
+  e.g.
+      docker run rnieb-backend      <---- will run the CMD in dockerfile
+      docker run rnieb-backend bash <---- will override CMD and run the shell instead
 
 --- IMAGEMAGICK + IMAGICK ( GO BINDINGS ) ------------------------------------------------
 
-  * imagemagick version 7 only works with golang imagick v3 bindings
-    ( ensure you pull the v3 bindings if get missing includes )
+* imagemagick version 7 only works with golang imagick v3 bindings
+  ( ensure you pull the v3 bindings if get missing includes )
+
+--- CORS ---------------------------------------------------------------------------------
+
+request goes out
+server receives it
+server attaches access allow origin header to response
+browser receives response and checks this header 
+if the header allows this origin to make request, browser loads response into javascript
 
 --- PACMAN & LANDLOCK --------------------------------------------------------------------
 

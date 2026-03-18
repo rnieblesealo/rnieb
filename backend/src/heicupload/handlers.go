@@ -87,7 +87,7 @@ func UploadHandler(w http.ResponseWriter, req *http.Request) {
 
 		allowedMimeTypes := []string{
 			"image/png",
-			"image/jpg",
+			"image/jpeg",
 			"image/heic",
 		}
 
@@ -136,9 +136,19 @@ func UploadHandler(w http.ResponseWriter, req *http.Request) {
 			httpStatus = http.StatusBadRequest // FIXME: also why bad request here? same suggestion as above
 		}
 
-		// CONVERT THE IMAGE IF IN HEIC FORMAT
-		if fileMimeType == "image/heic" {
-			HEICToPNG(imgFile.Name())
+		// CONVERT THE IMAGE IF NOT IN PNG FORMAT
+
+		if fileMimeType != "image/png" {
+			convertedFilepath, err := ConvertToPNG(imgFile.Name())
+			if err != nil {
+				errNew = err.Error()
+				httpStatus = http.StatusInternalServerError
+			}
+
+			ResizePNG(convertedFilepath)
+		} else {
+			// resize only if already png
+			ResizePNG(imgFile.Name())
 		}
 	}
 

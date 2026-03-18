@@ -8,41 +8,89 @@ import (
 	"strings"
 )
 
-func HEICToPNG(imagePath string) {
+const (
+	TARGET_WIDTH               = 500
+	TARGET_COMPRESSION_QUALITY = 50
+)
+
+// returns the new filepath
+func ConvertToPNG(imagePath string) (string, error) {
 	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
 
 	// read image
 	err := mw.ReadImage(imagePath)
 	if err != nil {
-		fmt.Printf("HEICToJPG: %s", err.Error())
-		return
+		return "", err
 	}
 
 	mw.SetFormat("PNG")
-	mw.SetImageCompressionQuality(50)
+	mw.SetImageCompressionQuality(TARGET_COMPRESSION_QUALITY)
 
-	/*
-	   -resize 500x500 \
-	   -extent 1:1 \
-	   -gravity Center \
-	   -quality 50 \
-	*/
+	// resize such that width is 500 but aspect is maintained
+	width := mw.GetImageWidth()
+	height := mw.GetImageHeight()
 
-	mw.ResizeImage(500, 500, imagick.FILTER_LANCZOS)
+	convFactor := uint(TARGET_WIDTH / width)
+
+	mw.ResizeImage(uint(width*convFactor), uint(height*convFactor), imagick.FILTER_POINT)
 
 	// write new png image
 	// name will be same but extended as png, e.g. "image39.heic" --> "image39.png"
-	newFilename := fmt.Sprintf("%s.png", strings.TrimSuffix(filepath.Base(imagePath), filepath.Ext(imagePath)))
-	newPath := filepath.Join(filepath.Dir(imagePath), newFilename)
+	newFilename := fmt.Sprintf("%s.png",
+		strings.TrimSuffix(filepath.Base(imagePath), filepath.Ext(imagePath)))
+	newFilepath := filepath.Join(filepath.Dir(imagePath), newFilename)
 
-	err = mw.WriteImage(newPath)
+	err = mw.WriteImage(newFilepath)
 	if err != nil {
-		fmt.Printf("HEICToJPG: %s", err.Error())
-		return
+		return "", err
 	}
 
 	// get rid of original heic image
 	os.Remove(imagePath)
 
-	fmt.Printf("Successfully converted %s to %s", imagePath, newPath)
+	fmt.Printf("Successfully converted %s to %s\n", imagePath, newFilepath)
+
+	return newFilepath, nil
+}
+
+func ResizePNG(imagePath string) {
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+
+	mw.SetFormat("PNG")
+
+	// read image
+	err := mw.ReadImage(imagePath)
+	if err != nil {
+		fmt.Printf("ConvertToPNG: %s\n", err.Error())
+		return
+	}
+
+	// only allow png
+	format := mw.GetImageFormat()
+	if format != "PNG" {
+		fmt.Printf("ConvertToPNG: Only PNG images are allowed (received %s)\n", format)
+		return
+	}
+
+	// resize
+	width := mw.GetImageWidth()
+	height := mw.GetImageHeight()
+
+	var convFactor float32 = TARGET_WIDTH / float32(width)
+
+	mw.ResizeImage(
+		uint(float32(width)*convFactor),
+		uint(float32(height)*convFactor),
+		imagick.FILTER_POINT)
+
+	// write
+	err = mw.WriteImage(imagePath)
+	if err != nil {
+		fmt.Printf("PNGToJPG: %s\n", err.Error())
+		return
+	}
+
+	fmt.Printf("Resized %s\n", imagePath)
 }

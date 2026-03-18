@@ -19,7 +19,7 @@ const Collage = () => {
   return (
     /* render the images */
     <div>
-      {imageFilenames.map(imageFilename => (
+      {imageFilenames && imageFilenames.map(imageFilename => (
         <img key={imageFilename} src={`http://localhost:8080/uploads/${imageFilename}`} />
       ))}
     </div>
