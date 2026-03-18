@@ -1,4 +1,4 @@
-package imgfetch
+package fetch
 
 import (
 	"database/sql"

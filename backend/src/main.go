@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"gopkg.in/gographics/imagick.v3/imagick"
-	"heicupload.rnieb.dev/heicupload"
-	"heicupload.rnieb.dev/imgfetch"
+	"rnieb/fetch"
+	"rnieb/upload"
 )
 
 const (
@@ -30,13 +30,13 @@ func main() {
 	defer imagick.Terminate()
 
 	// setup image upload handlers
-	http.HandleFunc("/ping", heicupload.PingHandler)
-	http.HandleFunc("/upload", heicupload.UploadHandler)
+	http.HandleFunc("/ping", upload.Ping)
+	http.HandleFunc("/upload", upload.Upload)
 
 	// setup image fetch handlers
-	http.HandleFunc("/list-images", imgfetch.ListImages) // WARNING: use get-drawings!
+	http.HandleFunc("/list-images", fetch.ListImages) // WARNING: use get-drawings!
 
-	http.HandleFunc("/get-drawings", imgfetch.GetDrawings)
+	http.HandleFunc("/get-drawings", fetch.GetDrawings)
 
 	/* set up a fileserver that will look for an image filename inside /uploads
 	e.g. a request to /uploads/img0.png will extract the filename from url

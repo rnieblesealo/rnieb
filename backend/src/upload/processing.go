@@ -1,4 +1,4 @@
-package heicupload
+package upload
 
 import (
 	"fmt"
@@ -13,66 +13,78 @@ const (
 	TARGET_COMPRESSION_QUALITY = 50
 )
 
-// returns the new filepath
+// Converts the image at the given path to PNG with TARGET_COMPRESSION_QUALITY applied
+// Returns the converted PNG's filepath
+// This filepath is the original filename but with a .png extension instead
 func ConvertToPNG(imagePath string) (string, error) {
+	// Create MagickWand
+	/* One wand per edited image is expected, create + destroy MW has low overhead */
+
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
-	// read image
+	// Read image
+
 	err := mw.ReadImage(imagePath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("ConvertToPNG: Failed to read image: %s", err)
 	}
 
+	// Set conversion format
+
 	mw.SetFormat("PNG")
+
+	// Set compression quality
+
 	mw.SetImageCompressionQuality(TARGET_COMPRESSION_QUALITY)
 
-	// resize such that width is 500 but aspect is maintained
-	width := mw.GetImageWidth()
-	height := mw.GetImageHeight()
+	// Write the result with the correct PNG extension
 
-	convFactor := uint(TARGET_WIDTH / width)
-
-	mw.ResizeImage(uint(width*convFactor), uint(height*convFactor), imagick.FILTER_POINT)
-
-	// write new png image
-	// name will be same but extended as png, e.g. "image39.heic" --> "image39.png"
 	newFilename := fmt.Sprintf("%s.png",
 		strings.TrimSuffix(filepath.Base(imagePath), filepath.Ext(imagePath)))
+
 	newFilepath := filepath.Join(filepath.Dir(imagePath), newFilename)
 
 	err = mw.WriteImage(newFilepath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("ConvertToPNG: Failed to write image: %s", err)
 	}
 
-	// get rid of original heic image
-	os.Remove(imagePath)
+	// Remove the original unconverted image
 
-	fmt.Printf("Successfully converted %s to %s\n", imagePath, newFilepath)
+	os.Remove(imagePath)
 
 	return newFilepath, nil
 }
 
 func ResizePNG(imagePath string) (string, error) {
+	// Start wand
+
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
+	// Set format
+
 	mw.SetFormat("PNG")
 
-	// read image
+	// Read image
+
 	err := mw.ReadImage(imagePath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("ResizePNG: Failed to read image: %s", err)
 	}
 
-	// only allow png
+	// Ensure is PNG
+
 	format := mw.GetImageFormat()
 	if format != "PNG" {
-		return "", fmt.Errorf("Only PNG images are allowed (received %s)\n", format)
+		return "", fmt.Errorf(
+			"ResizePNG: Only PNG images are allowed (received %s)\n",
+			format)
 	}
 
-	// resize
+	// Perform resize (see README for math explanation)
+
 	width := mw.GetImageWidth()
 	height := mw.GetImageHeight()
 
@@ -83,13 +95,13 @@ func ResizePNG(imagePath string) (string, error) {
 		uint(float32(height)*convFactor),
 		imagick.FILTER_POINT)
 
-	// write
+	// Write result
+	/* Since is same filename, no need to remove; it will be overwritten */
+
 	err = mw.WriteImage(imagePath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("ConvertToPNG: Failed to write image: %s", err)
 	}
-
-	fmt.Printf("Resized %s\n", imagePath)
 
 	return imagePath, nil
 }
