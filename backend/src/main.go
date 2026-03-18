@@ -34,7 +34,9 @@ func main() {
 	http.HandleFunc("/upload", heicupload.UploadHandler)
 
 	// setup image fetch handlers
-	http.HandleFunc("/list-images", imgfetch.ListImages)
+	http.HandleFunc("/list-images", imgfetch.ListImages) // WARNING: use get-drawings!
+
+	http.HandleFunc("/get-drawings", imgfetch.GetDrawings)
 
 	/* set up a fileserver that will look for an image filename inside /uploads
 	e.g. a request to /uploads/img0.png will extract the filename from url

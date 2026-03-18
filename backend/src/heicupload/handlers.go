@@ -162,7 +162,7 @@ func UploadHandler(w http.ResponseWriter, req *http.Request) {
 	} else {
 		defer db.Close()
 		db.Exec(`
-			INSERT INTO drawings (name, description, url)
+			INSERT INTO drawings (name, description, path)
 			VALUES (?, ?, ?)	
 	`, imageName, imageDescription, imageFilepath)
 	}
