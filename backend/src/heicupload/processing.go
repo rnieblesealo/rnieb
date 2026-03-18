@@ -54,7 +54,7 @@ func ConvertToPNG(imagePath string) (string, error) {
 	return newFilepath, nil
 }
 
-func ResizePNG(imagePath string) {
+func ResizePNG(imagePath string) (string, error) {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
@@ -63,15 +63,13 @@ func ResizePNG(imagePath string) {
 	// read image
 	err := mw.ReadImage(imagePath)
 	if err != nil {
-		fmt.Printf("ConvertToPNG: %s\n", err.Error())
-		return
+		return "", err
 	}
 
 	// only allow png
 	format := mw.GetImageFormat()
 	if format != "PNG" {
-		fmt.Printf("ConvertToPNG: Only PNG images are allowed (received %s)\n", format)
-		return
+		return "", fmt.Errorf("Only PNG images are allowed (received %s)\n", format)
 	}
 
 	// resize
@@ -88,9 +86,10 @@ func ResizePNG(imagePath string) {
 	// write
 	err = mw.WriteImage(imagePath)
 	if err != nil {
-		fmt.Printf("PNGToJPG: %s\n", err.Error())
-		return
+		return "", err
 	}
 
 	fmt.Printf("Resized %s\n", imagePath)
+
+	return imagePath, nil
 }

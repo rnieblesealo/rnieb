@@ -10,3 +10,6 @@
 
 # no binaries
 server
+
+# no database
+*.db

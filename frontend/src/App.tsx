@@ -9,7 +9,6 @@ const Collage = () => {
     axios.get("http://localhost:8080/list-images")
       .then(res => {
         setImageFilenames(res.data)
-        console.log(res.data)
       })
       .catch(err => {
         console.error("Failed to fetch images:", err)
@@ -54,14 +53,23 @@ export default function App() {
         action="http://localhost:8080/upload"
         method="POST"
         encType="multipart/form-data"
-        className="flex flex-col items-center gap-3 m-4"
+        className="flex flex-col items-start gap-3 m-4"
       >
-        <label htmlFor="upload-images" className="font-bold w-fit">Upload Images</label>
+        <input
+          type="text"
+          name="name"
+          placeholder="Name..."
+        />
+        <input
+          type="text"
+          name="description"
+          placeholder="Description..."
+        />
         <input
           id="upload-images"
           type="file"
+          name="file"
           accept="image/*"
-          multiple
           className="w-fit"
         />
         <button type="submit" className="bg-red-500 text-black p-4 w-fit">Upload</button>

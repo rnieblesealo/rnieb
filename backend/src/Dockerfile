@@ -8,7 +8,8 @@ RUN pacman -S --noconfirm --disable-sandbox \
   pkg-config \
   zlib \
   imagemagick \
-  libheif
+  libheif \
+  sqlite
 
 # working directory inside container
 WORKDIR /app

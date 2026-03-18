@@ -119,3 +119,16 @@ as such, we must DISABLE SANDBOXING to get pacman to work in docker
 
 this is still SECURE;
 the container is already a layer of sandboxing on its own!
+
+--- MYSQL --------------------------------------------------------------------------------
+
+mysql is now MARIADB ( damn... )
+
+mysql_install_db            <---- sets up mysql; run once on install
+  --user=mysql              <---- do everything mysql related under this user
+  --basedir=/usr            <---- where mysql lives on disk
+  --datadir=/var/lib/mysql  <---- where all mysql data lives on disk
+
+mysqld_safe &               <---- start mysql server
+
+mysql -u root               <---- connect to mysql server as root
