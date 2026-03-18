@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 html {
-  color: black;
-  background-color: white;
+  color: var(--color-red-500);
+  background-color: black;
   font-family: monospace
 }

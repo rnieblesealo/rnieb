@@ -7,3 +7,6 @@
 
 # ignore heic files
 **/*.heic
+
+# no binaries
+server
