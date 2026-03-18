@@ -202,8 +202,6 @@ func Upload(w http.ResponseWriter, req *http.Request) {
 		pngImageFilepath, _ = ResizePNG(imageFile.Name())
 	}
 
-	fmt.Printf("%s\n", pngImageFilepath)
-
 	// Create image entry in DB
 
 	db, err := sql.Open("sqlite3", "./rnieb.db") // Open DB connection
