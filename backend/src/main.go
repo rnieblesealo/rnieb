@@ -14,38 +14,40 @@ const (
 	PORT = ":8080"
 )
 
-// cors middleware
-// this assumes our program is a fully public api
+// Allows any origin to access this; effectively we're a public API
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*") // fix cors
 		next.ServeHTTP(w, r)
 	})
-
 }
 
 func main() {
-	// initialize imagemagick
+	// Initialize ImageMagick
+	/* Must be done once; C API */
+
 	imagick.Initialize()
 	defer imagick.Terminate()
 
-	// setup image upload handlers
+	// Setup upload handlers
+
 	http.HandleFunc("/ping", upload.Ping)
 	http.HandleFunc("/upload", upload.Upload)
 
-	// setup image fetch handlers
+	// Setup fetch handlers
+
 	http.HandleFunc("/get-drawings", fetch.GetDrawings)
 
-	/* set up a fileserver that will look for an image filename inside /uploads
-	e.g. a request to /uploads/img0.png will extract the filename from url
-	then look for that only in the fileserver */
+	// Setup image fileserver
 
 	http.Handle("/uploads/", // handle uploads route
 		http.StripPrefix("/uploads/", // strip this prefix from url ( leaves only filename )
 			http.FileServer(http.Dir("/uploads")))) // a fileserver for the /uploads dir
 
-	fmt.Printf("Launching server on port %s...\n", PORT)
+	fmt.Printf("Starting RNIEB server on port %s...\n", PORT)
 
-	log.Fatal(http.ListenAndServe(PORT, corsMiddleware(http.DefaultServeMux))) // listenandserve always returns non nil err
-	// add cors middleware when serving!
+	// Start HTTP server
+
+	log.Fatal(http.ListenAndServe(PORT, corsMiddleware(http.DefaultServeMux)))
+	// ListenAndServe always returns non nil err; only fails if it errors???
 }
