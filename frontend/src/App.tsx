@@ -1,14 +1,21 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 
+interface Drawing {
+  id: string,
+  name: string,
+  description: string,
+  path: string
+}
+
 const Collage = () => {
-  const [imageFilenames, setImageFilenames] = useState([])
+  const [drawings, setDrawings] = useState<Drawing[]>([])
 
   // fetch images
   useEffect(() => {
-    axios.get("http://localhost:8080/list-images")
+    axios.get("http://localhost:8080/get-drawings")
       .then(res => {
-        setImageFilenames(res.data)
+        setDrawings(res.data)
       })
       .catch(err => {
         console.error("Failed to fetch images:", err)
@@ -18,12 +25,15 @@ const Collage = () => {
   return (
     /* render the images */
     <div className="grid grid-cols-3 w-128">
-      {imageFilenames && imageFilenames.map(imageFilename => (
-        <img
-          key={imageFilename}
-          src={`http://localhost:8080/uploads/${imageFilename}`}
-          className="w-xs aspect-1/1 object-cover"
-        />
+      {drawings && drawings.map(drawing => (
+        <div key={drawing.id}>
+          <span>{drawing.name}</span>
+          <img
+            src={`http://localhost:8080/${drawing.path}`}
+            className="w-xs aspect-1/1 object-cover"
+          />
+          <span>{drawing.description}</span>
+        </div>
       ))}
     </div>
   )
