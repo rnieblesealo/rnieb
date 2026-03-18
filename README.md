@@ -10,6 +10,8 @@ It's really more of an art project than a programming one :)
 
 It's also meant to be a learning exercise, because when I do things by hand and force myself to struggle, I learn *a lot* more! 
 
+The backend is written in Go and the frontend uses TypeScripted React with Tailwind and Vite to build.
+
 Below are some screenshots of the project as it comes together.
 
 Enjoy!
