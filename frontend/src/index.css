@@ -5,3 +5,17 @@ html {
   background-color: black;
   font-family: monospace
 }
+
+/* disable scrollbars ( for overflow hidden ) */
+
+* {
+  -ms-overflow-style: none;
+  /* internet explorer */
+  scrollbar-width: none;
+  /* firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  /* safari */
+}
