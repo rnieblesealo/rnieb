@@ -77,17 +77,28 @@ func authMiddleware(next http.Handler) http.Handler {
 
 				// i'm just passing the only secret i have bc my case is simple tho
 
-				return auth.JWT_SECRET, nil
+				return []byte(auth.JWT_SECRET), nil
+				// WARNING: not bytecasting this will give SNEAKY errors
 			})
+
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("JWT parsing failed: %s", err),
+				nil,
+				http.StatusBadRequest)
+
+			return
+		}
 
 		// check that it is valid ( we were able to decrypt it )
 
-		if err != nil || !jwt.Valid {
+		if !jwt.Valid {
 			common.RNRespond(
 				w,
 				"JWT not valid",
 				nil,
-				http.StatusUnauthorized)
+				http.StatusBadRequest)
 
 			return
 		}

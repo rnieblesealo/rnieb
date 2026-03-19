@@ -118,11 +118,11 @@ export default function App() {
 
     // check auth
 
-    // console.log(localStorage.getItem("token"))
-
     axios.get("http://localhost:8080/me")
       .then(() => setLoggedIn(true))
-  }, [])
+      .catch(() => setLoggedIn(false))
+      .finally(() => console.log(loggedIn))
+  }, [loggedIn])
 
 
   // use custom submission function to avoid json response page behavior
@@ -164,33 +164,40 @@ export default function App() {
   return (
     <div className="w-full h-min flex flex-col items-center justify-center">
       {/* auth status */}
-      <span className="text-red-500 m-1">Not Logged In</span>
-      <form
-        onSubmit={handleLogin}
-        className="flex flex-col items-start gap-3 m-1"
-      >
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          className="w-full"
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          className="w-full"
-        />
-        <button
-          type="submit"
-          className="bg-red-500 text-black p-1 w-full font-bold "
+      {!loggedIn ?
+        <span className="text-red-500 m-4">Not Logged In</span> :
+        <span className="text-green-500 mt-4 font-bold">Logged In!</span>
+      }
+
+      {/* login form, only display if not logged in */}
+      {!loggedIn &&
+        <form
+          onSubmit={handleLogin}
+          className="flex flex-col items-start gap-3 m-1"
         >
-          Log In
-        </button>
-      </form>
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            className="w-full"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            className="w-full"
+          />
+          <button
+            type="submit"
+            className="bg-red-500 text-black p-1 w-full font-bold "
+          >
+            Log In
+          </button>
+        </form>
+      }
 
       {/* ascii title */}
-      <div className="flex flex-row gap-5 text-xs m-4">
+      <div className="flex flex-row gap-5 text-xs m-8">
         <pre>{deco}</pre>
         <pre>{logo}</pre>
       </div>
@@ -203,44 +210,46 @@ export default function App() {
         />
       </div >
 
-      {/* upload image form */}
-      <div className="flex flex-col items-center justify-center m-4 text-red-500">
-        <span className="mb-4">Upload a Drawing</span>
-        <form
-          onSubmit={handleUploadForm}
-          className="flex flex-col items-start gap-3 m-4"
-        >
-          {/* image uploader */}
-          <input
-            id="upload-images"
-            type="file"
-            name="file"
-            accept="image/*"
-            className="w-full"
-          />
-          {/* image name */}
-          <input
-            type="text"
-            name="name"
-            placeholder="Name..."
-            className="w-full"
-          />
-          {/* image description */}
-          <textarea
-            name="description"
-            placeholder="Description..."
-            rows={4}
-            className="w-full"
-          />
-          {/* submit button */}
-          <button
-            type="submit"
-            className="bg-red-500 text-black p-2 w-full font-bold "
+      {/* login form */}
+      {loggedIn &&
+        <div className="flex flex-col items-center justify-center mt-8 text-red-500">
+          <span className="mb-4">Upload a Drawing</span>
+          <form
+            onSubmit={handleUploadForm}
+            className="flex flex-col items-start gap-3 m-4"
           >
-            Upload
-          </button>
-        </form>
-      </div>
-    </div>
+            {/* image uploader */}
+            <input
+              id="upload-images"
+              type="file"
+              name="file"
+              accept="image/*"
+              className="w-full"
+            />
+            {/* image name */}
+            <input
+              type="text"
+              name="name"
+              placeholder="Name..."
+              className="w-full"
+            />
+            {/* image description */}
+            <textarea
+              name="description"
+              placeholder="Description..."
+              rows={4}
+              className="w-full"
+            />
+            {/* submit button */}
+            <button
+              type="submit"
+              className="bg-red-500 text-black p-2 w-full font-bold "
+            >
+              Upload
+            </button>
+          </form>
+        </div>
+      }
+    </div >
   )
 }
