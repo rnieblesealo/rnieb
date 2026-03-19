@@ -151,6 +151,7 @@ now we really need to figure out filepathing stuff...
                  *** layers are filesystem snapshots that store a diff of the previous
 
 * docker image prune <---- removes <none> dangling images
+* DOCKER COMPOSE ( docker-compose.yml ) helps define how to run containers
 
 --- PKGCONFIG ----------------------------------------------------------------------------
 

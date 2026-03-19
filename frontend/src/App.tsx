@@ -47,7 +47,7 @@ const DrawingTile = ({ data, loggedIn, onDelete }: DrawingTileProps) => {
       <div className="relative">
         {/* image itself */}
         <img
-          src={`${baseUrl}/${data.path}`}
+          src={`${baseUrl}/uploads/${data.path}`}
           className="w-fit aspect-square object-cover"
         />
         {/* description overlay */}
@@ -62,7 +62,7 @@ const DrawingTile = ({ data, loggedIn, onDelete }: DrawingTileProps) => {
             {loggedIn &&
               <button
                 onClick={() => {
-                  axios.delete("${baseUrl}/delete-drawing", {
+                  axios.delete(`${baseUrl}/delete-drawing`, {
                     params: { id: data.id }
                   }).then(() => onDelete())
                 }}

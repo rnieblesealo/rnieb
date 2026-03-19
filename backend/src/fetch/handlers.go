@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"rnieb/common"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -23,7 +24,7 @@ func GetDrawings(db *sql.DB) http.HandlerFunc {
 		/* Only include the id, name, description and path, no need for creation date */
 
 		rows, err := db.Query(`
-			SELECT id, name, description, path FROM drawings
+			SELECT id, name, description, filename FROM drawings
 	`)
 		if err != nil {
 			common.RNRespond(
@@ -65,7 +66,7 @@ func GetDrawings(db *sql.DB) http.HandlerFunc {
 }
 
 // Deletes a drawing and its file
-func DeleteDrawing(db *sql.DB) http.HandlerFunc {
+func DeleteDrawing(db *sql.DB, uploadPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		// Get the deletion ID from URL params
 
@@ -73,20 +74,21 @@ func DeleteDrawing(db *sql.DB) http.HandlerFunc {
 
 		// Get the path of the image we want to delete
 
-		var deletionImagePath string
+		var deletionImageFilename string
 		db.QueryRow(`
-		SELECT path
+		SELECT filename 
 		FROM drawings
 		WHERE id = ?
-		`, deletionID).Scan(&deletionImagePath) // NOTE: Only db.Query requires closing
+		`, deletionID).Scan(&deletionImageFilename) // NOTE: Only db.Query requires closing
 
 		// Delete the image from the filesystem
 
-		err := os.Remove(deletionImagePath)
+		err := os.Remove(filepath.Join(uploadPath, deletionImageFilename))
+
 		if err != nil {
 			common.RNRespond(
 				w,
-				fmt.Sprintf("Failed to delete image (location %s): %s", deletionImagePath, err),
+				fmt.Sprintf("Failed to delete image (location %s): %s", deletionImageFilename, err),
 				nil,
 				http.StatusInternalServerError)
 
@@ -113,7 +115,7 @@ func DeleteDrawing(db *sql.DB) http.HandlerFunc {
 			fmt.Sprintf(
 				"Successfully deleted ID %s with image %s",
 				deletionID,
-				deletionImagePath),
+				deletionImageFilename),
 			nil,
 			http.StatusOK,
 		)

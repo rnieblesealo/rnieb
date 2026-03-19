@@ -19,3 +19,6 @@ server
 
 # no ssh keys
 **/*.ssh/
+
+# no datadir
+**/*data/

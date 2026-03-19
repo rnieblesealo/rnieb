@@ -33,5 +33,5 @@ RUN go mod download
 COPY . .
 
 # build & run
-RUN go build -o rnieb-backend .
+RUN go build -o rnieb-backend -v
 CMD ["./rnieb-backend"]

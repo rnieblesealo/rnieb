@@ -3,19 +3,18 @@ package upload
 import (
 	"database/sql"
 	"fmt"
-	"github.com/gabriel-vasile/mimetype"
-	_ "github.com/mattn/go-sqlite3"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"rnieb/common"
 	"time"
+
+	"github.com/gabriel-vasile/mimetype"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
-	UPLOAD_DIR = "/uploads"
-
 	FORM_IMAGE_FILE_NAME        = "file"
 	FORM_IMAGE_DESCRIPTION_NAME = "description"
 	FORM_IMAGE_NAME_NAME        = "name"
@@ -31,7 +30,7 @@ func Ping(message string) http.HandlerFunc {
 }
 
 // Handles image uploads
-func Upload(db *sql.DB) http.HandlerFunc {
+func Upload(db *sql.DB, uploadPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		// Parse request form
 
@@ -116,7 +115,7 @@ func Upload(db *sql.DB) http.HandlerFunc {
 
 		// Create uploads dir
 
-		err = os.MkdirAll(UPLOAD_DIR, os.ModePerm)
+		err = os.MkdirAll(uploadPath, os.ModePerm)
 		if err != nil {
 			common.RNRespond(
 				w,
@@ -132,7 +131,7 @@ func Upload(db *sql.DB) http.HandlerFunc {
 
 		imageFilepath :=
 			fmt.Sprintf("%s/%d%s",
-				UPLOAD_DIR,
+				uploadPath,
 				time.Now().UnixNano(),
 				filepath.Ext(imageFileHandle.Filename))
 
@@ -191,9 +190,9 @@ func Upload(db *sql.DB) http.HandlerFunc {
 		// Create image entry in DB
 
 		_, err = db.Exec(`
-			INSERT INTO drawings (name, description, path)
+			INSERT INTO drawings (name, description, filename)
 			VALUES (?, ?, ?)	
-	`, imageName, imageDescription, pngImageFilepath) // Run insertion query
+	`, imageName, imageDescription, filepath.Base(pngImageFilepath)) // Run insertion query
 		if err != nil {
 			common.RNRespond(
 				w,

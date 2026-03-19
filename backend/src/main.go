@@ -118,17 +118,26 @@ func main() {
 	imagick.Initialize()
 	defer imagick.Terminate()
 
+	// Get important env variables
+
+	dbPath := os.Getenv("DB_PATH")
+	uploadPath := os.Getenv("UPLOAD_PATH")
+	secretsPath := os.Getenv("DOTENV_PATH")
+
+	// Load secrets .env
+	// Non-secret environment variables are loaded by compose
+
+	godotenv.Load(secretsPath)
+
+	fmt.Printf("%s %s %s\n", dbPath, uploadPath, secretsPath)
+
 	// Open database connection
 
-	db, err := sql.Open("sqlite3", "./rnieb.db") // Open DB connection
+	db, err := sql.Open("sqlite3", dbPath) // Open DB connection
 	if err != nil {
 		log.Fatalf("Failed to open DB connection: %s\n", err)
 	}
 	defer db.Close()
-
-	// Load .env
-
-	godotenv.Load() // WARNING: Pass correct filename! This assumes curr. dir with no args
 
 	// Setup auth handlers
 
@@ -138,20 +147,20 @@ func main() {
 	// Setup upload handlers (auth-protected)
 
 	http.Handle("/ping", upload.Ping("Marco? Polo!"))
-	http.Handle("/upload", authMiddleware(upload.Upload(db)))
+	http.Handle("/upload", authMiddleware(upload.Upload(db, uploadPath)))
 
 	// Setup fetch handlers
 
 	http.HandleFunc("/get-drawings", fetch.GetDrawings(db))
-	http.Handle("/delete-drawing", authMiddleware(fetch.DeleteDrawing(db)))
+	http.Handle("/delete-drawing", authMiddleware(fetch.DeleteDrawing(db, uploadPath)))
 
 	// Setup image fileserver
 
 	http.Handle("/uploads/", // Setup handler for uploads route
 		http.StripPrefix("/uploads/", // Strip this prefix from URL ( Leaves only filename )
-			http.FileServer(http.Dir("/uploads")))) // Look for that file in /uploads
+			http.FileServer(http.Dir(uploadPath)))) // Look for that file in /uploads
 
-	fmt.Printf("Starting RNIEB server on port %s...\n", PORT)
+	fmt.Printf("Starting rnieb server on port %s...\n", PORT)
 
 	// Start HTTP
 
