@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"rnieb/auth"
 	"rnieb/common"
@@ -12,6 +13,7 @@ import (
 	"rnieb/upload"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
@@ -77,7 +79,7 @@ func authMiddleware(next http.Handler) http.Handler {
 
 				// i'm just passing the only secret i have bc my case is simple tho
 
-				return []byte(auth.JWT_SECRET), nil
+				return []byte(os.Getenv("JWT_SECRET")), nil
 				// WARNING: not bytecasting this will give SNEAKY errors
 			})
 
@@ -123,6 +125,10 @@ func main() {
 		log.Fatalf("Failed to open DB connection: %s\n", err)
 	}
 	defer db.Close()
+
+	// Load .env
+
+	godotenv.Load() // WARNING: Pass correct filename! This assumes curr. dir with no args
 
 	// Setup auth handlers
 

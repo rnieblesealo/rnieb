@@ -4,14 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
 	"rnieb/common"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-)
-
-const (
-	JWT_SECRET = "chiikawa" // WARNING: temporary!
 )
 
 func Login(db *sql.DB) http.HandlerFunc {
@@ -52,7 +49,8 @@ func Login(db *sql.DB) http.HandlerFunc {
 			"exp":      time.Now().Add(24 * time.Hour).Unix(), // valid for 24 hours
 		})
 
-		tokenString, err := token.SignedString([]byte(JWT_SECRET)) // Sign token with JWT secret
+		tokenString, err := token.SignedString(
+			[]byte(os.Getenv("JWT_SECRET"))) // Sign token with .env JWT secret
 		if err != nil {
 			common.RNRespond(
 				w,
