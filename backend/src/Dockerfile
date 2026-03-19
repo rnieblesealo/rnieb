@@ -1,13 +1,22 @@
 FROM lopsided/archlinux:devel
 
-# install dependencies
-RUN pacman -Syu --noconfirm --disable-sandbox 
+# update mirrors 
+RUN pacman -Sy --noconfirm --disable-sandbox
+
+# update system packages
+RUN pacman -Su --noconfirm --disable-sandbox
+
+# install my dependencies
 RUN pacman -S --noconfirm --disable-sandbox \
   go \
   gcc \
   pkg-config \
   zlib \
   imagemagick \
+  openjpeg2 \
+  dav1d \
+  ffmpeg \
+  rav1e \
   libheif \
   sqlite
 
