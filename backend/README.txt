@@ -74,6 +74,10 @@ since it'll just be me admindashing, i'm just gonna have a single "admins" table
 [x] lanczos filtering? -- an expensive quality-centric image resizing algo
 [x] cors?
 
+[ ] jwts?
+    claims?
+[ ] indirect in go.mod?
+
 === LEARNING NOTES =======================================================================
 
 --- MULTIPART FORMS ----------------------------------------------------------------------
