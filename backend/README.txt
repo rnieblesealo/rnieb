@@ -55,6 +55,18 @@ returns JSON STRUCT WITH MESSAGE on success
 we are opening/closing DB a lot of times...
   should we just repass one connection started once?
 
+since it'll just be me admindashing, i'm just gonna have a single "admins" table 
+  *** how will i secure the database passwords?
+  *** autoincrement id's probably not good here since probing attack might happen
+
+*** SQLITE IS NOT THREAD SAFE!
+    find a way to handle concurrent requests 
+    ( are 2 handlers running at same time concurrent ? )
+
+login currently uses localstorage to cache creds
+  this is vulnerable to xss attacks
+  upgrading to http only cookie is the move --- do this later to first learn basic auth
+
 === QUESTIONS ============================================================================
 
 [x] multipart forms?
@@ -65,6 +77,18 @@ we are opening/closing DB a lot of times...
 [x] pkgconfig?
 [x] lanczos filtering? -- an expensive quality-centric image resizing algo
 [x] cors?
+
+[ ] jwts?
+    claims?
+[ ] indirect in go.mod?
+[ ] OPTIONS header?
+[ ] localstorage?
+[ ] xss attack?
+[ ] cookies?
+[ ] http.handle vs http.handler? ( go ) / protected routes
+[ ] interfaces in go
+[ ] serve mux?
+[ ] delete keyword in typescript?
 
 === LEARNING NOTES =======================================================================
 
@@ -208,3 +232,8 @@ CONVERSIONS:
 1GiB: 2^30
 
   ( conversion factor is 2^10 )
+
+--- SECURITY -----------------------------------------------------------------------------
+
+* generate jwt secrets using ---> openssl -rand -base64 32 
+    ( 32 bytes is std. length for HS256 secret encoding )

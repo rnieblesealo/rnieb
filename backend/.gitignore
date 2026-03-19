@@ -13,3 +13,6 @@ server
 
 # no database
 *.db
+
+# no secrets
+.env

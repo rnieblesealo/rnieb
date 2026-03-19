@@ -13,7 +13,13 @@ interface Drawing {
   path: string
 }
 
-const DrawingTile = ({ data, onDelete }: { data: Drawing, onDelete: () => void }) => {
+interface DrawingTileProps {
+  data: Drawing,
+  loggedIn: boolean,
+  onDelete: () => void
+}
+
+const DrawingTile = ({ data, loggedIn, onDelete }: DrawingTileProps) => {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -38,15 +44,17 @@ const DrawingTile = ({ data, onDelete }: { data: Drawing, onDelete: () => void }
               {data.description}
             </span>
             {/* delete button */}
-            <button
-              onClick={() => {
-                axios.delete("http://localhost:8080/delete-drawing", {
-                  params: { id: data.id }
-                }).then(onDelete)
-              }}
-              className="relative w-fit p-2 mb-4 bg-red-500">
-              Delete
-            </button>
+            {loggedIn &&
+              <button
+                onClick={() => {
+                  axios.delete("http://localhost:8080/delete-drawing", {
+                    params: { id: data.id }
+                  }).then(() => onDelete())
+                }}
+                className="relative w-fit p-2 mb-4 bg-red-500">
+                Delete
+              </button>
+            }
           </div>
         }
       </div>
@@ -54,20 +62,13 @@ const DrawingTile = ({ data, onDelete }: { data: Drawing, onDelete: () => void }
   )
 }
 
-const Collage = () => {
-  const [drawings, setDrawings] = useState<Drawing[]>([])
+interface CollageProps {
+  drawings: Drawing[],
+  loggedIn: boolean,
+  setDrawings: React.Dispatch<React.SetStateAction<Drawing[]>>
+}
 
-  // fetch images
-  useEffect(() => {
-    axios.get("http://localhost:8080/get-drawings")
-      .then(res => {
-        const getDrawingsResponse: GetDrawingsResponse = res.data
-        setDrawings(getDrawingsResponse.data)
-      })
-      .catch(err => {
-        console.error("Failed to fetch images:", err)
-      })
-  }, [])
+const Collage = ({ drawings, loggedIn, setDrawings }: CollageProps) => {
 
   /* when a tile is deleted, we filter it out of the list to reflect deletion
    * it will be gone on refresh fully since the useffect will fire */
@@ -83,6 +84,7 @@ const Collage = () => {
         <DrawingTile
           key={drawing.id}
           data={drawing}
+          loggedIn={loggedIn}
           onDelete={() => handleDelete(drawing.id)}
         />
       ))}
@@ -90,59 +92,201 @@ const Collage = () => {
   )
 }
 
+// retrieve and set auth token
+
+/* this stuff runs on app entry point before anything is rendered
+useffects inside <app> run on component mount
+for auth shit do this outside since we want it done before anything renders */
+
+const token = localStorage.getItem("token")
+if (token) {
+  axios.defaults.headers.common["Authorization"] = token
+}
+
 export default function App() {
   const [logo, setLogo] = useState('')
   const [deco, setDeco] = useState('')
+  const [drawings, setDrawings] = useState<Drawing[]>([])
+  const [loggedIn, setLoggedIn] = useState(false)
 
-  axios.get("/logo.txt").then(res => { setLogo(res.data) })
-  axios.get("/stars.txt").then(res => { setDeco(res.data) })
+  useEffect(() => {
+    // get logo parts
+
+    axios.get("/logo.txt").then(res => { setLogo(res.data) })
+    axios.get("/stars.txt").then(res => { setDeco(res.data) })
+
+    // fetch drawings
+
+    axios.get("http://localhost:8080/get-drawings")
+      .then(res => {
+        const getDrawingsResponse: GetDrawingsResponse = res.data
+        setDrawings(getDrawingsResponse.data)
+      })
+      .catch(err => {
+        console.error("Failed to fetch images:", err)
+      })
+
+    // check auth
+
+    axios.get("http://localhost:8080/me")
+      .then(() => setLoggedIn(true))
+      .catch(() => setLoggedIn(false))
+  }, [])
+
+
+  // use custom submission function to avoid json response page behavior
+
+  async function handleUploadForm(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault()
+
+    // submit image upload request 
+
+    const formData = new FormData(e.currentTarget)
+    axios.post("http://localhost:8080/upload", formData) // submit upload
+      .then(() => {
+        // on upload complete, refetch drawings to update display
+
+        axios.get("http://localhost:8080/get-drawings")
+          .then(res => {
+            const getDrawingsResponse: GetDrawingsResponse = res.data
+            setDrawings(getDrawingsResponse.data)
+          })
+      })
+  }
+
+  async function handleLogin(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault()
+
+    // submit login credentials
+
+    const formData = new FormData(e.currentTarget)
+    axios.post("http://localhost:8080/login", formData)
+      .then(res => {
+        // save login token to localstorage; set in axios defaults
+        // see the tradeoffs of this in README
+
+        const token = res.data.data.token
+        localStorage.setItem("token", token)
+
+        axios.defaults.headers.common["Authorization"] = token
+
+        setLoggedIn(true)
+      })
+  }
+
+  function handleLogout() {
+    // remove token from local storage
+
+    localStorage.removeItem("token")
+
+    // delete axios auth header
+    /* delete keyword removes a property from an object */
+
+    delete axios.defaults.headers.common["Authorization"]
+
+    setLoggedIn(false)
+  }
 
   return (
     <div className="w-full h-min flex flex-col items-center justify-center">
-      <div className="flex flex-row gap-5 text-xs m-6">
+      {/* ascii title */}
+      <div className="flex flex-row gap-5 text-xs m-8">
         <pre>{deco}</pre>
         <pre>{logo}</pre>
       </div>
 
       {/* display images */}
       <div>
-        <Collage />
+        <Collage
+          drawings={drawings}
+          loggedIn={loggedIn}
+          setDrawings={setDrawings}
+        />
       </div >
 
-      {/* upload image form */}
-      <div className="flex flex-col items-center justify-center m-6 text-red-500">
-        <span className="font-bold mb-6">Upload a Drawing</span>
-        <form
-          action="http://localhost:8080/upload"
-          method="POST"
-          encType="multipart/form-data"
-          className="flex flex-col items-start gap-3 m-4"
-        >
-          {/* image uploader */}
-          <input
-            id="upload-images"
-            type="file"
-            name="file"
-            accept="image/*"
-            className="w-full"
-          />
-          {/* image name */}
-          <input
-            type="text"
-            name="name"
-            placeholder="Name..."
-            className="w-full"
-          />
-          {/* image description */}
-          <textarea
-            name="description"
-            placeholder="Description..."
-            rows={4}
-            className="w-full"
-          />
-          <button type="submit" className="bg-red-500 text-black p-2 w-full font-bold ">Upload</button>
-        </form>
+      {/* footer; either displays upload or auth */}
+      <div className="flex flex-col m-8 items-center justify-center">
+        {/* auth status */}
+        {!loggedIn ?
+          <span className="text-red-500 mt-4">Not Logged In</span> :
+          <div className="mt-4 flex flex-row gap-5 items-center justify-center">
+            <span className="text-green-500 font-bold">Logged In!</span>
+            <button
+              onClick={handleLogout}
+            >
+              [ Log Out ]
+            </button>
+          </div>
+        }
+
+        {/* login form, only display if not logged in */}
+        {!loggedIn &&
+          <form
+            onSubmit={handleLogin}
+            className="flex flex-col items-start gap-3 m-4"
+          >
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
+            />
+            <button
+              type="submit"
+              className="w-full font-bold"
+            >
+              [ Log In ]
+            </button>
+          </form>
+        }
+
+        {/* upload form */}
+        {loggedIn &&
+          <div className="flex flex-col items-center justify-center text-red-500 mt-4">
+            <span>Upload a Drawing</span>
+            <form
+              onSubmit={handleUploadForm}
+              className="flex flex-col items-start gap-3 m-4"
+            >
+              {/* image uploader */}
+              <input
+                id="upload-images"
+                type="file"
+                name="file"
+                accept="image/*"
+                className="w-full px-2 py-1"
+              />
+              {/* image name */}
+              <input
+                type="text"
+                name="name"
+                placeholder="Name..."
+                className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
+              />
+              {/* image description */}
+              <textarea
+                name="description"
+                placeholder="Description..."
+                rows={4}
+                className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
+              />
+              {/* submit button */}
+              <button
+                type="submit"
+                className="w-full font-bold"
+              >
+                [ Upload ]
+              </button>
+            </form>
+          </div>
+        }
       </div>
-    </div>
+    </div >
   )
 }

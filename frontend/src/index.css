@@ -19,3 +19,13 @@ html {
   display: none;
   /* safari */
 }
+
+/* disable focus outlines */
+*:focus {
+  outline: none;
+}
+
+/* hide placeholders on focus */
+*:focus::placeholder {
+  color: transparent;
+}
