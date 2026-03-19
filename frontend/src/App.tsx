@@ -107,31 +107,67 @@ export default function App() {
 
 
   // use custom submission function to avoid json response page behavior
-  /* source for submitevent: https://github.com/remix-run/react-router/issues/14795 */
-  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+
+  async function handleUploadForm(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
 
     // submit image upload request 
 
     const formData = new FormData(e.currentTarget)
-    await axios.post("http://localhost:8080/upload", formData)
+    axios.post("http://localhost:8080/upload", formData) // submit upload
+      .then(() => {
+        // on upload complete, refetch drawings to update display
 
-    // refetch images to update view
-
-    await axios.get("http://localhost:8080/get-drawings")
-      .then(res => {
-        const getDrawingsResponse: GetDrawingsResponse = res.data
-        setDrawings(getDrawingsResponse.data)
+        axios.get("http://localhost:8080/get-drawings")
+          .then(res => {
+            const getDrawingsResponse: GetDrawingsResponse = res.data
+            setDrawings(getDrawingsResponse.data)
+          })
       })
-      .catch(err => {
-        console.error("Failed to fetch images:", err)
+  }
+
+  async function handleLogin(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault()
+
+    // submit login credentials
+
+    const formData = new FormData(e.currentTarget)
+    axios.post("http://localhost:8080/login", formData)
+      .then(res => {
+        console.log(res.data.token)
       })
   }
 
   return (
     <div className="w-full h-min flex flex-col items-center justify-center">
+      {/* auth status */}
+      <span className="text-red-500 m-1">Not Logged In</span>
+      <form
+        onSubmit={handleLogin}
+        className="flex flex-col items-start gap-3 m-1"
+      >
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          className="w-full"
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          className="w-full"
+        />
+        <button
+          type="submit"
+          className="bg-red-500 text-black p-1 w-full font-bold "
+        >
+          Log In
+        </button>
+      </form>
+
       {/* ascii title */}
-      <div className="flex flex-row gap-5 text-xs m-6">
+      <div className="flex flex-row gap-5 text-xs m-4">
         <pre>{deco}</pre>
         <pre>{logo}</pre>
       </div>
@@ -145,10 +181,10 @@ export default function App() {
       </div >
 
       {/* upload image form */}
-      <div className="flex flex-col items-center justify-center m-6 text-red-500">
-        <span className="font-bold mb-6">Upload a Drawing</span>
+      <div className="flex flex-col items-center justify-center m-4 text-red-500">
+        <span className="mb-4">Upload a Drawing</span>
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleUploadForm}
           className="flex flex-col items-start gap-3 m-4"
         >
           {/* image uploader */}

@@ -63,6 +63,10 @@ since it'll just be me admindashing, i'm just gonna have a single "admins" table
     find a way to handle concurrent requests 
     ( are 2 handlers running at same time concurrent ? )
 
+login currently uses localstorage to cache creds
+  this is vulnerable to xss attacks
+  upgrading to http only cookie is the move --- do this later to first learn basic auth
+
 === QUESTIONS ============================================================================
 
 [x] multipart forms?
@@ -78,6 +82,12 @@ since it'll just be me admindashing, i'm just gonna have a single "admins" table
     claims?
 [ ] indirect in go.mod?
 [ ] OPTIONS header?
+[ ] localstorage?
+[ ] xss attack?
+[ ] cookies?
+[ ] http.handle vs http.handler? ( go ) / protected routes
+[ ] interfaces in go
+[ ] serve mux?
 
 === LEARNING NOTES =======================================================================
 

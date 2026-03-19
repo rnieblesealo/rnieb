@@ -24,8 +24,10 @@ const (
 )
 
 // Check for heartbeat
-func Ping(w http.ResponseWriter, req *http.Request) {
-	common.RNRespond(w, "Polo!", nil, http.StatusOK)
+func Ping() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		common.RNRespond(w, "Polo!", nil, http.StatusOK)
+	}
 }
 
 // Handles image uploads
