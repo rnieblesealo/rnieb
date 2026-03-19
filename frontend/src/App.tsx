@@ -13,7 +13,13 @@ interface Drawing {
   path: string
 }
 
-const DrawingTile = ({ data, onDelete }: { data: Drawing, onDelete: () => void }) => {
+interface DrawingTileProps {
+  data: Drawing,
+  loggedIn: boolean,
+  onDelete: () => void
+}
+
+const DrawingTile = ({ data, loggedIn, onDelete }: DrawingTileProps) => {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -38,15 +44,17 @@ const DrawingTile = ({ data, onDelete }: { data: Drawing, onDelete: () => void }
               {data.description}
             </span>
             {/* delete button */}
-            <button
-              onClick={() => {
-                axios.delete("http://localhost:8080/delete-drawing", {
-                  params: { id: data.id }
-                }).then(() => onDelete())
-              }}
-              className="relative w-fit p-2 mb-4 bg-red-500">
-              Delete
-            </button>
+            {loggedIn &&
+              <button
+                onClick={() => {
+                  axios.delete("http://localhost:8080/delete-drawing", {
+                    params: { id: data.id }
+                  }).then(() => onDelete())
+                }}
+                className="relative w-fit p-2 mb-4 bg-red-500">
+                Delete
+              </button>
+            }
           </div>
         }
       </div>
@@ -56,10 +64,11 @@ const DrawingTile = ({ data, onDelete }: { data: Drawing, onDelete: () => void }
 
 interface CollageProps {
   drawings: Drawing[],
+  loggedIn: boolean,
   setDrawings: React.Dispatch<React.SetStateAction<Drawing[]>>
 }
 
-const Collage = ({ drawings, setDrawings }: CollageProps) => {
+const Collage = ({ drawings, loggedIn, setDrawings }: CollageProps) => {
 
   /* when a tile is deleted, we filter it out of the list to reflect deletion
    * it will be gone on refresh fully since the useffect will fire */
@@ -75,6 +84,7 @@ const Collage = ({ drawings, setDrawings }: CollageProps) => {
         <DrawingTile
           key={drawing.id}
           data={drawing}
+          loggedIn={loggedIn}
           onDelete={() => handleDelete(drawing.id)}
         />
       ))}
@@ -121,8 +131,7 @@ export default function App() {
     axios.get("http://localhost:8080/me")
       .then(() => setLoggedIn(true))
       .catch(() => setLoggedIn(false))
-      .finally(() => console.log(loggedIn))
-  }, [loggedIn])
+  }, [])
 
 
   // use custom submission function to avoid json response page behavior
@@ -153,45 +162,69 @@ export default function App() {
     const formData = new FormData(e.currentTarget)
     axios.post("http://localhost:8080/login", formData)
       .then(res => {
-        // save login token to localstorage
+        // save login token to localstorage; set in axios defaults
         // see the tradeoffs of this in README
 
         const token = res.data.data.token
         localStorage.setItem("token", token)
+
+        axios.defaults.headers.common["Authorization"] = token
+
+        setLoggedIn(true)
       })
+  }
+
+  function handleLogout() {
+    // remove token from local storage
+
+    localStorage.removeItem("token")
+
+    // delete axios auth header
+    /* delete keyword removes a property from an object */
+
+    delete axios.defaults.headers.common["Authorization"]
+
+    setLoggedIn(false)
   }
 
   return (
     <div className="w-full h-min flex flex-col items-center justify-center">
       {/* auth status */}
       {!loggedIn ?
-        <span className="text-red-500 m-4">Not Logged In</span> :
-        <span className="text-green-500 mt-4 font-bold">Logged In!</span>
+        <span className="text-red-500 mt-4">Not Logged In</span> :
+        <div className="mt-4 flex flex-row gap-5 items-center justify-center">
+          <span className="text-green-500 font-bold">Logged In!</span>
+          <button
+            onClick={handleLogout}
+          >
+            [ Log Out ]
+          </button>
+        </div>
       }
 
       {/* login form, only display if not logged in */}
       {!loggedIn &&
         <form
           onSubmit={handleLogin}
-          className="flex flex-col items-start gap-3 m-1"
+          className="flex flex-col items-start gap-3 m-4"
         >
           <input
             type="text"
             name="username"
             placeholder="Username"
-            className="w-full"
+            className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
           />
           <input
             type="password"
             name="password"
             placeholder="Password"
-            className="w-full"
+            className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
           />
           <button
             type="submit"
-            className="bg-red-500 text-black p-1 w-full font-bold "
+            className="w-full font-bold"
           >
-            Log In
+            [ Log In ]
           </button>
         </form>
       }
@@ -206,6 +239,7 @@ export default function App() {
       <div>
         <Collage
           drawings={drawings}
+          loggedIn={loggedIn}
           setDrawings={setDrawings}
         />
       </div >
@@ -213,7 +247,7 @@ export default function App() {
       {/* login form */}
       {loggedIn &&
         <div className="flex flex-col items-center justify-center mt-8 text-red-500">
-          <span className="mb-4">Upload a Drawing</span>
+          <span>Upload a Drawing</span>
           <form
             onSubmit={handleUploadForm}
             className="flex flex-col items-start gap-3 m-4"
@@ -224,28 +258,28 @@ export default function App() {
               type="file"
               name="file"
               accept="image/*"
-              className="w-full"
+              className="w-full px-2 py-1"
             />
             {/* image name */}
             <input
               type="text"
               name="name"
               placeholder="Name..."
-              className="w-full"
+              className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
             />
             {/* image description */}
             <textarea
               name="description"
               placeholder="Description..."
               rows={4}
-              className="w-full"
+              className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
             />
             {/* submit button */}
             <button
               type="submit"
-              className="bg-red-500 text-black p-2 w-full font-bold "
+              className="w-full font-bold"
             >
-              Upload
+              [ Upload ]
             </button>
           </form>
         </div>

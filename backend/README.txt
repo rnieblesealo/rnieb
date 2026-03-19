@@ -88,6 +88,7 @@ login currently uses localstorage to cache creds
 [ ] http.handle vs http.handler? ( go ) / protected routes
 [ ] interfaces in go
 [ ] serve mux?
+[ ] delete keyword in typescript?
 
 === LEARNING NOTES =======================================================================
 
