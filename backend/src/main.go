@@ -27,6 +27,12 @@ func corsMiddleware(next http.Handler) http.Handler {
 		// allow get, post delete only
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
 
+		// TODO: not sure what this does
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }
