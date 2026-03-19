@@ -67,6 +67,8 @@ login currently uses localstorage to cache creds
   this is vulnerable to xss attacks
   upgrading to http only cookie is the move --- do this later to first learn basic auth
 
+now we really need to figure out filepathing stuff...
+
 === QUESTIONS ============================================================================
 
 [x] multipart forms?
@@ -89,6 +91,12 @@ login currently uses localstorage to cache creds
 [ ] interfaces in go
 [ ] serve mux?
 [ ] delete keyword in typescript?
+[ ] ssh keys + server?
+[ ] if ip is intrinsic to machine how can we reassign them in hetzner dash?
+[ ] resolv.conf?
+[ ] gai.conf?
+[ ] mitm error ???
+[ ] authorized_keys + known_hosts?
 
 === LEARNING NOTES =======================================================================
 
@@ -105,6 +113,8 @@ login currently uses localstorage to cache creds
 * go.sum stores checksums of project deps
   on first go get, checksum is computed and stored here
   if we do go mod download ( e.g. on cloning repo ) that dl is verified against checksum
+* go build -v <---- -v flag shows build output
+                     useful for builds that take a while on server 
 
 --- HOMEBREW -----------------------------------------------------------------------------
 
@@ -139,6 +149,8 @@ login currently uses localstorage to cache creds
                  we must rerun that layer and everything below it on a new build
 
                  *** layers are filesystem snapshots that store a diff of the previous
+
+* docker image prune <---- removes <none> dangling images
 
 --- PKGCONFIG ----------------------------------------------------------------------------
 
@@ -237,3 +249,44 @@ CONVERSIONS:
 
 * generate jwt secrets using ---> openssl -rand -base64 32 
     ( 32 bytes is std. length for HS256 secret encoding )
+
+--- HETZNER HOSTING ----------------------------------------------------------------------
+
+honestly i just picked them cuz they don't say ai anywhere in their homepage
+
+to get ip:
+  dashboard > servers > public ip ( it shouldn't trail with a /xx ...)
+
+setup:
+  ssh in ( make sure to set up keys )
+  apt-get update
+  apt-get install -y docker.io        <----------- docker setup
+  systemctl start docker
+  systemctl enable docker
+    ( or just what u know: systemctl enable --now docker )
+  
+  clone ur code
+
+  build the container
+
+  run the container
+
+NOTES:
+  i tried ipv6 only setup
+
+  this failed because most of the internet still uses ipv4
+    AN IPV6 SERVER MAY ONLY REACH IPV6 THINGS
+
+  i got mitm error when rebuilding server after switching to ipv4
+    remove known host signature and try again
+
+  ssh -v to view log
+
+  root's home dir is at / level ( /root/ )
+
+  because go build must freshly compile imagemagick, this will take a WHILE on server
+
+TIPS:
+  use scp -6 for ipv6 addresses to be parsed correctly
+    use quotes around root@... part and wrap address in brackets,
+      e.g. scp -6 -i rnieb/.ssh/id_ed25519 -r ./rnieb "root@[xxxx:xxxx:xxxx...]:/root/"

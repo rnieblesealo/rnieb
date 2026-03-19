@@ -1,1 +1,4 @@
 **/.DS_Store
+
+# no ssh
+**/*.ssh/

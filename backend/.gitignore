@@ -15,4 +15,7 @@ server
 *.db
 
 # no secrets
-.env
+**/*.env
+
+# no ssh keys
+**/*.ssh/
