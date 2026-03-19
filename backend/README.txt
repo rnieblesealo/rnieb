@@ -77,6 +77,7 @@ since it'll just be me admindashing, i'm just gonna have a single "admins" table
 [ ] jwts?
     claims?
 [ ] indirect in go.mod?
+[ ] OPTIONS header?
 
 === LEARNING NOTES =======================================================================
 

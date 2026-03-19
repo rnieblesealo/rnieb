@@ -14,7 +14,7 @@ const (
 	JWT_SECRET = "chiikawa" // WARNING: temporary!
 )
 
-func LoginHandler(db *sql.DB) http.HandlerFunc {
+func Login(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		// Get submitted credentials
 

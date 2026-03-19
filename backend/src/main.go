@@ -27,7 +27,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 		// allow get, post delete only
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
 
-		// TODO: not sure what this does
+		// TODO: not sure what this does/is
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
@@ -52,17 +52,18 @@ func main() {
 	defer db.Close()
 
 	// Setup auth handlers
-	http.HandleFunc("/login", auth.LoginHandler(db))
+
+	http.HandleFunc("/login", auth.Login(db))
 
 	// Setup upload handlers
 
 	http.HandleFunc("/ping", upload.Ping)
-	http.HandleFunc("/upload", upload.Upload)
+	http.HandleFunc("/upload", upload.Upload(db))
 
 	// Setup fetch handlers
 
-	http.HandleFunc("/get-drawings", fetch.GetDrawings)
-	http.HandleFunc("/delete-drawing", fetch.DeleteDrawing)
+	http.HandleFunc("/get-drawings", fetch.GetDrawings(db))
+	http.HandleFunc("/delete-drawing", fetch.DeleteDrawing(db))
 
 	// Setup image fileserver
 
