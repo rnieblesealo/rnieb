@@ -33,6 +33,10 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
 
+		// allow authorization and content type headers
+
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+
 		// TODO: not sure what this does/is
 
 		if r.Method == "OPTIONS" {
@@ -112,10 +116,11 @@ func main() {
 	// Setup auth handlers
 
 	http.HandleFunc("/login", auth.Login(db))
+	http.Handle("/me", authMiddleware(upload.Ping("You are logged in!"))) // Login check
 
 	// Setup upload handlers (auth-protected)
 
-	http.Handle("/ping", authMiddleware(upload.Ping()))
+	http.Handle("/ping", upload.Ping("Marco? Polo!"))
 	http.Handle("/upload", authMiddleware(upload.Upload(db)))
 
 	// Setup fetch handlers

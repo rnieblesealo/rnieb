@@ -82,10 +82,22 @@ const Collage = ({ drawings, setDrawings }: CollageProps) => {
   )
 }
 
+// retrieve and set auth token
+
+/* this stuff runs on app entry point before anything is rendered
+useffects inside <app> run on component mount
+for auth shit do this outside since we want it done before anything renders */
+
+const token = localStorage.getItem("token")
+if (token) {
+  axios.defaults.headers.common["Authorization"] = token
+}
+
 export default function App() {
   const [logo, setLogo] = useState('')
   const [deco, setDeco] = useState('')
   const [drawings, setDrawings] = useState<Drawing[]>([])
+  const [loggedIn, setLoggedIn] = useState(false)
 
   useEffect(() => {
     // get logo parts
@@ -103,6 +115,13 @@ export default function App() {
       .catch(err => {
         console.error("Failed to fetch images:", err)
       })
+
+    // check auth
+
+    // console.log(localStorage.getItem("token"))
+
+    axios.get("http://localhost:8080/me")
+      .then(() => setLoggedIn(true))
   }, [])
 
 
@@ -134,7 +153,11 @@ export default function App() {
     const formData = new FormData(e.currentTarget)
     axios.post("http://localhost:8080/login", formData)
       .then(res => {
-        console.log(res.data.token)
+        // save login token to localstorage
+        // see the tradeoffs of this in README
+
+        const token = res.data.data.token
+        localStorage.setItem("token", token)
       })
   }
 

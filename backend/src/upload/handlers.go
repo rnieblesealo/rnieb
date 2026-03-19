@@ -24,9 +24,9 @@ const (
 )
 
 // Check for heartbeat
-func Ping() http.HandlerFunc {
+func Ping(message string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		common.RNRespond(w, "Polo!", nil, http.StatusOK)
+		common.RNRespond(w, message, nil, http.StatusOK)
 	}
 }
 
