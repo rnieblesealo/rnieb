@@ -1,13 +1,17 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 
-	"gopkg.in/gographics/imagick.v3/imagick"
+	"rnieb/auth"
 	"rnieb/fetch"
 	"rnieb/upload"
+
+	_ "github.com/mattn/go-sqlite3"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 const (
@@ -17,13 +21,12 @@ const (
 // Allows any origin to access this; effectively we're a public API
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// allow any origin
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		// allow get, post delete only
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
+
 		next.ServeHTTP(w, r)
 	})
 }
@@ -33,6 +36,17 @@ func main() {
 
 	imagick.Initialize()
 	defer imagick.Terminate()
+
+	// Open database connection
+
+	db, err := sql.Open("sqlite3", "./rnieb.db") // Open DB connection
+	if err != nil {
+		log.Fatalf("Failed to open DB connection: %s\n", err)
+	}
+	defer db.Close()
+
+	// Setup auth handlers
+	http.HandleFunc("/login", auth.LoginHandler(db))
 
 	// Setup upload handlers
 

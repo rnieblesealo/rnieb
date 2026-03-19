@@ -55,6 +55,14 @@ returns JSON STRUCT WITH MESSAGE on success
 we are opening/closing DB a lot of times...
   should we just repass one connection started once?
 
+since it'll just be me admindashing, i'm just gonna have a single "admins" table 
+  *** how will i secure the database passwords?
+  *** autoincrement id's probably not good here since probing attack might happen
+
+*** SQLITE IS NOT THREAD SAFE!
+    find a way to handle concurrent requests 
+    ( are 2 handlers running at same time concurrent ? )
+
 === QUESTIONS ============================================================================
 
 [x] multipart forms?
