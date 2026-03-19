@@ -19,6 +19,21 @@ interface DrawingTileProps {
   onDelete: () => void
 }
 
+
+// retrieve and set auth token
+
+/* this stuff runs on app entry point before anything is rendered
+useffects inside <app> run on component mount
+for auth shit do this outside since we want it done before anything renders */
+
+const token = localStorage.getItem("token")
+if (token) {
+  axios.defaults.headers.common["Authorization"] = token
+}
+
+// get base url 
+const baseUrl = import.meta.env.VITE_API_URL
+
 const DrawingTile = ({ data, loggedIn, onDelete }: DrawingTileProps) => {
   const [hovered, setHovered] = useState(false)
 
@@ -32,7 +47,7 @@ const DrawingTile = ({ data, loggedIn, onDelete }: DrawingTileProps) => {
       <div className="relative">
         {/* image itself */}
         <img
-          src={`http://localhost:8080/${data.path}`}
+          src={`${baseUrl}/${data.path}`}
           className="w-fit aspect-square object-cover"
         />
         {/* description overlay */}
@@ -47,7 +62,7 @@ const DrawingTile = ({ data, loggedIn, onDelete }: DrawingTileProps) => {
             {loggedIn &&
               <button
                 onClick={() => {
-                  axios.delete("http://localhost:8080/delete-drawing", {
+                  axios.delete("${baseUrl}/delete-drawing", {
                     params: { id: data.id }
                   }).then(() => onDelete())
                 }}
@@ -92,16 +107,6 @@ const Collage = ({ drawings, loggedIn, setDrawings }: CollageProps) => {
   )
 }
 
-// retrieve and set auth token
-
-/* this stuff runs on app entry point before anything is rendered
-useffects inside <app> run on component mount
-for auth shit do this outside since we want it done before anything renders */
-
-const token = localStorage.getItem("token")
-if (token) {
-  axios.defaults.headers.common["Authorization"] = token
-}
 
 export default function App() {
   const [logo, setLogo] = useState('')
@@ -117,7 +122,7 @@ export default function App() {
 
     // fetch drawings
 
-    axios.get("http://localhost:8080/get-drawings")
+    axios.get(`${baseUrl}/get-drawings`)
       .then(res => {
         const getDrawingsResponse: GetDrawingsResponse = res.data
         setDrawings(getDrawingsResponse.data)
@@ -128,7 +133,7 @@ export default function App() {
 
     // check auth
 
-    axios.get("http://localhost:8080/me")
+    axios.get(`${baseUrl}/me`)
       .then(() => setLoggedIn(true))
       .catch(() => setLoggedIn(false))
   }, [])
@@ -142,11 +147,11 @@ export default function App() {
     // submit image upload request 
 
     const formData = new FormData(e.currentTarget)
-    axios.post("http://localhost:8080/upload", formData) // submit upload
+    axios.post(`${baseUrl}/upload`, formData) // submit upload
       .then(() => {
         // on upload complete, refetch drawings to update display
 
-        axios.get("http://localhost:8080/get-drawings")
+        axios.get("${baseUrl}/get-drawings")
           .then(res => {
             const getDrawingsResponse: GetDrawingsResponse = res.data
             setDrawings(getDrawingsResponse.data)
@@ -160,7 +165,7 @@ export default function App() {
     // submit login credentials
 
     const formData = new FormData(e.currentTarget)
-    axios.post("http://localhost:8080/login", formData)
+    axios.post(`${baseUrl}/login`, formData)
       .then(res => {
         // save login token to localstorage; set in axios defaults
         // see the tradeoffs of this in README

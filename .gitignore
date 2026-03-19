@@ -2,3 +2,6 @@
 
 # no ssh
 **/*.ssh/
+
+# no secrets
+.env
