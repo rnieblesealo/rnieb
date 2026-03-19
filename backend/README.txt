@@ -232,3 +232,8 @@ CONVERSIONS:
 1GiB: 2^30
 
   ( conversion factor is 2^10 )
+
+--- SECURITY -----------------------------------------------------------------------------
+
+* generate jwt secrets using ---> openssl -rand -base64 32 
+    ( 32 bytes is std. length for HS256 secret encoding )
