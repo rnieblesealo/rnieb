@@ -189,46 +189,6 @@ export default function App() {
 
   return (
     <div className="w-full h-min flex flex-col items-center justify-center">
-      {/* auth status */}
-      {!loggedIn ?
-        <span className="text-red-500 mt-4">Not Logged In</span> :
-        <div className="mt-4 flex flex-row gap-5 items-center justify-center">
-          <span className="text-green-500 font-bold">Logged In!</span>
-          <button
-            onClick={handleLogout}
-          >
-            [ Log Out ]
-          </button>
-        </div>
-      }
-
-      {/* login form, only display if not logged in */}
-      {!loggedIn &&
-        <form
-          onSubmit={handleLogin}
-          className="flex flex-col items-start gap-3 m-4"
-        >
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
-          />
-          <button
-            type="submit"
-            className="w-full font-bold"
-          >
-            [ Log In ]
-          </button>
-        </form>
-      }
-
       {/* ascii title */}
       <div className="flex flex-row gap-5 text-xs m-8">
         <pre>{deco}</pre>
@@ -244,46 +204,89 @@ export default function App() {
         />
       </div >
 
-      {/* login form */}
-      {loggedIn &&
-        <div className="flex flex-col items-center justify-center mt-8 text-red-500">
-          <span>Upload a Drawing</span>
+      {/* footer; either displays upload or auth */}
+      <div className="flex flex-col m-8 items-center justify-center">
+        {/* auth status */}
+        {!loggedIn ?
+          <span className="text-red-500 mt-4">Not Logged In</span> :
+          <div className="mt-4 flex flex-row gap-5 items-center justify-center">
+            <span className="text-green-500 font-bold">Logged In!</span>
+            <button
+              onClick={handleLogout}
+            >
+              [ Log Out ]
+            </button>
+          </div>
+        }
+
+        {/* login form, only display if not logged in */}
+        {!loggedIn &&
           <form
-            onSubmit={handleUploadForm}
+            onSubmit={handleLogin}
             className="flex flex-col items-start gap-3 m-4"
           >
-            {/* image uploader */}
-            <input
-              id="upload-images"
-              type="file"
-              name="file"
-              accept="image/*"
-              className="w-full px-2 py-1"
-            />
-            {/* image name */}
             <input
               type="text"
-              name="name"
-              placeholder="Name..."
+              name="username"
+              placeholder="Username"
               className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
             />
-            {/* image description */}
-            <textarea
-              name="description"
-              placeholder="Description..."
-              rows={4}
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
               className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
             />
-            {/* submit button */}
             <button
               type="submit"
               className="w-full font-bold"
             >
-              [ Upload ]
+              [ Log In ]
             </button>
           </form>
-        </div>
-      }
+        }
+
+        {/* upload form */}
+        {loggedIn &&
+          <div className="flex flex-col items-center justify-center text-red-500 mt-4">
+            <span>Upload a Drawing</span>
+            <form
+              onSubmit={handleUploadForm}
+              className="flex flex-col items-start gap-3 m-4"
+            >
+              {/* image uploader */}
+              <input
+                id="upload-images"
+                type="file"
+                name="file"
+                accept="image/*"
+                className="w-full px-2 py-1"
+              />
+              {/* image name */}
+              <input
+                type="text"
+                name="name"
+                placeholder="Name..."
+                className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
+              />
+              {/* image description */}
+              <textarea
+                name="description"
+                placeholder="Description..."
+                rows={4}
+                className="w-full border border-red-900 focus:border-red-500 px-2 py-1"
+              />
+              {/* submit button */}
+              <button
+                type="submit"
+                className="w-full font-bold"
+              >
+                [ Upload ]
+              </button>
+            </form>
+          </div>
+        }
+      </div>
     </div >
   )
 }
