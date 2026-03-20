@@ -330,3 +330,7 @@ TRR = trusted recursive resolver
   instead of isp directly
 
   isp can't see dns resolution info; this helps do things more privately
+
+--- CI/CD --------------------------------------------------------------------------------
+
+github actions go under .github/workflows/
