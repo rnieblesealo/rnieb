@@ -308,3 +308,17 @@ TIPS:
   use scp -6 for ipv6 addresses to be parsed correctly
     use quotes around root@... part and wrap address in brackets,
       e.g. scp -6 -i rnieb/.ssh/id_ed25519 -r ./rnieb "root@[xxxx:xxxx:xxxx...]:/root/"
+
+--- DOMAIN STUFF -------------------------------------------------------------------------
+
+RECORD TYPES:
+  A           maps domain -> ip 
+  CNAME       maps domain -> domain
+
+HOST MEANINGS:
+  @                   root domain ( e.g. rnieb.dev )
+  www, stuff, api...  prefixes to root domain ( www.rnieb.dev, stuff.rnieb.dev... )
+
+remember some ports are reserved for stuff ( thank u beej! )
+  80          http
+  443         https
