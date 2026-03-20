@@ -167,15 +167,20 @@ OVERVIEW OF WHAT I'VE LEARNED:
   ( kinda jank for now because i'm a little lazy to do setup )
     
   since prod backend isn't exposed but reverse proxied to with nginx,
-  we must expose its port in the dev docker compose file
+  we must make a local build of the backend that DOES expose the port 
+  ( to access backend via localhost:8080/api/ )
 
   the frontend has both a prod and dev .env
 
   for prod it'll use /api ( nginx proxies this to backend )
-  for dev it'll use localhost:8080 ( which we exposed with the steps above )
+  for dev it'll use localhost:8080/api ( which we exposed with the steps above )
 
   STEPS:
     * docker compose -f docker-compose.dev.yml up backend --build
         ( build and run backend with dev compose file; this version exposes port )
     * npm run dev the frontend normally 
-      ( MAKE SURE YOU HAVE THE PROD AND DEV ENV FILES! )
+
+  NOTES:
+    * make sure you have the dev env file for the frontend IF IN DEV/LOCAL
+    * prod only needs production env file
+    * to get the real data in the backend, scp its /backend/data folder to your machine
