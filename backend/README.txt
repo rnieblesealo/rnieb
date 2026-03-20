@@ -334,3 +334,6 @@ TRR = trusted recursive resolver
 --- CI/CD --------------------------------------------------------------------------------
 
 github actions go under .github/workflows/
+
+REPO SECRET <---- available to all workflows
+ENVIRONMENT SECRET <----- scoped to specific environment ( we can give jobs scopes )
