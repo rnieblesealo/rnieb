@@ -164,7 +164,8 @@ nginx frontend:
   this is useful bc if we build in the final container, leftovers from build 
   ( source code, node modules, etc.) make the filesize huge when we only need the binary
 
-* docker compose up --build <---- rebuild this time!
+* docker compose up --build       <---- rebuild this time!
+* docker compose up <servicename> <----- only compose one of the services
 
 --- PKGCONFIG ----------------------------------------------------------------------------
 
@@ -304,6 +305,8 @@ TIPS:
   use scp -6 for ipv6 addresses to be parsed correctly
     use quotes around root@... part and wrap address in brackets,
       e.g. scp -6 -i rnieb/.ssh/id_ed25519 -r ./rnieb "root@[xxxx:xxxx:xxxx...]:/root/"
+
+  flip scp order to copy from remote to local ( duh... )
 
 --- DOMAIN STUFF -------------------------------------------------------------------------
 

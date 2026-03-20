@@ -161,3 +161,21 @@ OVERVIEW OF WHAT I'VE LEARNED:
   * <form>s and sending data over via POSTs!
   * using localStorage
   * setting axios default headers
+
+--- DEV SETUP ---------------------------------------------------------------------------
+
+  ( kinda jank for now because i'm a little lazy to do setup )
+    
+  since prod backend isn't exposed but reverse proxied to with nginx,
+  we must expose its port in the dev docker compose file
+
+  the frontend has both a prod and dev .env
+
+  for prod it'll use /api ( nginx proxies this to backend )
+  for dev it'll use localhost:8080 ( which we exposed with the steps above )
+
+  STEPS:
+    * docker compose -f docker-compose.dev.yml up backend --build
+        ( build and run backend with dev compose file; this version exposes port )
+    * npm run dev the frontend normally 
+      ( MAKE SURE YOU HAVE THE PROD AND DEV ENV FILES! )

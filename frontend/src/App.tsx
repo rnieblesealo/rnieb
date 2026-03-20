@@ -19,6 +19,10 @@ interface DrawingTileProps {
   onDelete: () => void
 }
 
+// get base url
+// changes depending on whether this is prod or dev
+const baseUrl = import.meta.env.VITE_BASE_URL
+console.log("Using base URL:", baseUrl)
 
 // retrieve and set auth token
 
@@ -44,7 +48,7 @@ const DrawingTile = ({ data, loggedIn, onDelete }: DrawingTileProps) => {
       <div className="relative">
         {/* image itself */}
         <img
-          src={`/api/uploads/${data.path}`}
+          src={`${baseUrl}/uploads/${data.path}`}
           className="w-fit aspect-square object-cover"
         />
         {/* description overlay */}
@@ -59,7 +63,7 @@ const DrawingTile = ({ data, loggedIn, onDelete }: DrawingTileProps) => {
             {loggedIn &&
               <button
                 onClick={() => {
-                  axios.delete(`/api/delete-drawing`, {
+                  axios.delete(`${baseUrl}/delete-drawing`, {
                     params: { id: data.id }
                   }).then(() => onDelete())
                 }}
@@ -119,7 +123,7 @@ export default function App() {
 
     // fetch drawings
 
-    axios.get(`/api/get-drawings`)
+    axios.get(`${baseUrl}/get-drawings`)
       .then(res => {
         const getDrawingsResponse: GetDrawingsResponse = res.data
         setDrawings(getDrawingsResponse.data)
@@ -130,7 +134,7 @@ export default function App() {
 
     // check auth
 
-    axios.get(`/api/me`)
+    axios.get(`${baseUrl}/me`)
       .then(() => setLoggedIn(true))
       .catch(() => setLoggedIn(false))
   }, [])
@@ -144,11 +148,11 @@ export default function App() {
     // submit image upload request 
 
     const formData = new FormData(e.currentTarget)
-    axios.post(`/api/upload`, formData) // submit upload
+    axios.post(`${baseUrl}/upload`, formData) // submit upload
       .then(() => {
         // on upload complete, refetch drawings to update display
 
-        axios.get("/api/get-drawings")
+        axios.get(`${baseUrl}/get-drawings`)
           .then(res => {
             const getDrawingsResponse: GetDrawingsResponse = res.data
             setDrawings(getDrawingsResponse.data)
@@ -162,7 +166,7 @@ export default function App() {
     // submit login credentials
 
     const formData = new FormData(e.currentTarget)
-    axios.post(`/api/login`, formData)
+    axios.post(`${baseUrl}/login`, formData)
       .then(res => {
         // save login token to localstorage; set in axios defaults
         // see the tradeoffs of this in README
