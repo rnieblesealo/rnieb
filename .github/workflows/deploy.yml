@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main # how/why can we redeploy from many branches?
+  workflow_dispatch: # add manual trigger button
 jobs:
   deploy:
     runs-on: ubuntu-latest # os github actions runner will use
