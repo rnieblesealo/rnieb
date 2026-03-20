@@ -39,9 +39,10 @@ It's really more of an art project than a programming one :)
 It's also meant to be a learning exercise, 
 because when I do things by hand and force myself to struggle, I learn *a lot* more! 
 
-The backend is written in Go.
-The frontend uses TypeScripted React with Tailwind and Vite to build.
+The backend is written in Go ( and runs in arch btw... )
+The frontend uses TypeScripted React with Tailwind and Vite to build; it's served via nginx.
 Both are dockerized using compose.
+Everything is hosted in an Ubuntu Hetzner VPS.
 
 Take a look at their respective dirs to read my notes and mini specs on each!
 
