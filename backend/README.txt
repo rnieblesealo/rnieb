@@ -322,3 +322,11 @@ HOST MEANINGS:
 remember some ports are reserved for stuff ( thank u beej! )
   80          http
   443         https
+
+dig <domain name> <----- checks if dns has propagated yet, USEFUL AF!
+
+TRR = trusted recursive resolver
+  if a domain has this true, it's resolved with a trusted entity ( cloudflare ) 
+  instead of isp directly
+
+  isp can't see dns resolution info; this helps do things more privately
