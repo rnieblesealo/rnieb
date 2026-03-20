@@ -1,5 +1,8 @@
 FROM lopsided/archlinux:devel
 
+# working directory inside container
+WORKDIR /app
+
 # update mirrors 
 RUN pacman -Sy --noconfirm --disable-sandbox
 
@@ -20,12 +23,7 @@ RUN pacman -S --noconfirm --disable-sandbox \
   libheif \
   sqlite
 
-# working directory inside container
-WORKDIR /app
-
-# NOTE: don't need copy directives for now since we're using volume mount
-
-# copy go files
+# copy go files first for better layer caching
 COPY go.mod go.sum ./
 RUN go mod download
 

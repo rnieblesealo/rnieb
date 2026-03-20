@@ -141,23 +141,23 @@ func main() {
 
 	// Setup auth handlers
 
-	http.HandleFunc("/login", auth.Login(db))
-	http.Handle("/me", authMiddleware(upload.Ping("You are logged in!"))) // Login check
+	http.HandleFunc("/api/login", auth.Login(db))
+	http.Handle("/api/me", authMiddleware(upload.Ping("You are logged in!"))) // Login check
 
 	// Setup upload handlers (auth-protected)
 
-	http.Handle("/ping", upload.Ping("Marco? Polo!"))
-	http.Handle("/upload", authMiddleware(upload.Upload(db, uploadPath)))
+	http.Handle("/api/ping", upload.Ping("Marco? Polo!"))
+	http.Handle("/api/upload", authMiddleware(upload.Upload(db, uploadPath)))
 
 	// Setup fetch handlers
 
-	http.HandleFunc("/get-drawings", fetch.GetDrawings(db))
-	http.Handle("/delete-drawing", authMiddleware(fetch.DeleteDrawing(db, uploadPath)))
+	http.HandleFunc("/api/get-drawings", fetch.GetDrawings(db))
+	http.Handle("/api/delete-drawing", authMiddleware(fetch.DeleteDrawing(db, uploadPath)))
 
 	// Setup image fileserver
 
-	http.Handle("/uploads/", // Setup handler for uploads route
-		http.StripPrefix("/uploads/", // Strip this prefix from URL ( Leaves only filename )
+	http.Handle("/api/uploads/", // Setup handler for uploads route
+		http.StripPrefix("/api/uploads/", // Strip this prefix from URL ( Leaves only filename )
 			http.FileServer(http.Dir(uploadPath)))) // Look for that file in /uploads
 
 	fmt.Printf("Starting rnieb server on port %s...\n", PORT)

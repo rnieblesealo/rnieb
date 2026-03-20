@@ -69,6 +69,11 @@ login currently uses localstorage to cache creds
 
 now we really need to figure out filepathing stuff...
 
+we should really upgrade to AS BUILDER pattern 
+
+nginx frontend:
+  since /api/ is proxied to backend, backend routes must be prefixed with /api/
+
 === QUESTIONS ============================================================================
 
 [x] multipart forms?
@@ -97,6 +102,7 @@ now we really need to figure out filepathing stuff...
 [ ] gai.conf?
 [ ] mitm error ???
 [ ] authorized_keys + known_hosts?
+[ ] AS builder dockerfile pattern
 
 === LEARNING NOTES =======================================================================
 
@@ -152,6 +158,17 @@ now we really need to figure out filepathing stuff...
 
 * docker image prune <---- removes <none> dangling images
 * DOCKER COMPOSE ( docker-compose.yml ) helps define how to run containers
+
+* docker containers may reach each other via servicename, no port expose required
+  so a frontend container can talk to the backend
+
+* AS builder makes an intermediate container that builds the thing
+  we then copy to the real container in last stage  
+
+  this is useful bc if we build in the final container, leftovers from build 
+  ( source code, node modules, etc.) make the filesize huge when we only need the binary
+
+* docker compose up --build <---- rebuild this time!
 
 --- PKGCONFIG ----------------------------------------------------------------------------
 

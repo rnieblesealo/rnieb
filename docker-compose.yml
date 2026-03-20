@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      - DB_PATH=/app/data/rnieb.db # path of db in container
+      - UPLOAD_PATH=/app/data/uploads/ # uploads destination
+      - DOTENV_PATH=/app/data/.env
+    volumes:
+      - ./backend/data:/app/data/ # mounts ./data as /app/data in container
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80" # "host:container"; don't use 80 on the host since it's probably in use
+    depends_on:
+      - backend
+
+        # port 80 is the default http port, that's why we use it
