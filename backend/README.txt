@@ -6,18 +6,14 @@
 | '_ \ / _` |/ __| |/ / _ \ '_ \ / _` |
 | |_) | (_| | (__|   <  __/ | | | (_| |
 |_.__/ \__,_|\___|_|\_\___|_| |_|\__,_|
-       ___________
-      |.---------.|
-      ||         ||
-      ||         ||
-      ||         ||
-      |'---------'|
-       `)__ ____('
-       [=== -- o ]--.
-     __'---------'__ \
-    [::::::::::: :::] )
-     `""'"""""'""""`/T\
-                    \_/
+     ____________________________
+    /                           /\
+   /                          _/ /\
+  /                          / \/
+ /                           /\
+/___________________________/ /
+\___________________________\/
+ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
 
 for now this only consists of an image processing service:
 1. we upload a heic image to server
@@ -341,3 +337,4 @@ ENVIRONMENT SECRET <----- scoped to specific environment ( we can give jobs scop
 add workflow_dispatch to add manual action trigger button
 
 need to add passphrase as well
+  don't use these for cicd since the key itself is already secret; passphrase not needed

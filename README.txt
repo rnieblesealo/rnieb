@@ -47,132 +47,116 @@ Take a look at their respective dirs to read my notes and mini specs on each!
 
 Thank you for visiting :)
 
--- LIST OF TOPICS/SKILLS I HAVE LEARNED ABOUT/USED FROM THIS --
+OVERVIEW OF WHAT I'VE LEARNED:
+  ( see individual frontend and backend readmes for more... )
 
-FRONTEND/REACT
+ _                _                  _ 
+| |__   __ _  ___| | _____ _ __   __| |
+| '_ \ / _` |/ __| |/ / _ \ '_ \ / _` |
+| |_) | (_| | (__|   <  __/ | | | (_| |
+|_.__/ \__,_|\___|_|\_\___|_| |_|\__,_|
+     ____________________________
+    /                           /\
+   /                          _/ /\
+  /                          / \/
+ /                           /\
+/___________________________/ /
+\___________________________\/
+ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
 
-- Environment variables and base URL configuration in Vite
-- React file serving and API calls without a base URL
-- Favicon configuration
-- TypeScript interfaces and types
-- useState and useEffect
-- Axios requests
-- Form handling and preventDefault
-- File uploads with FormData
-- CORS
-- Tailwind CSS
-- Component composition and props
+  [ golang ]
 
-GO
+    * getting comfortable with writing/reading go
+    * using go's patterns correctly ( defers, error handling... )
+        creating/destroying stuff appropriately ( db driver, imagemagick instance )
+    * the layout of a go project ( packages, modules ); using external deps
+    * doing http with net/http
+        writing and settning up middleware + handlers
+        multipart form parsing
+        encoding json w/custom structs 
+    * doing sqlite/database stuff with go-sqlite3 and database/sql
+    * auth with jwts
+    * pathing/os stuff with os and filepath packages
 
-- Package imports and shadowing
-- Error handling
-- Custom types and structs
-- Function signatures with multiple return values
-- Defer and init()
-- Pointers and nullable arguments
-- Type assertions
-- Constants and package-level vars
-- HTTP server with net/http
-- Multipart form parsing
-- JSON encoding
-- SQLite with go-sqlite3
-- JWT authentication
-- Middleware chaining
-- CGO and build tags
-- Resolving home directory with os.UserHomeDir()
-- Creating directories with os.MkdirAll()
-- File server setup with http.Handle, http.StripPrefix, http.Dir
-- Reading config from environment variables
+  [ docker ]
+    ( my first time properly using docker... )
+  
+    * conceptual basics 
+      ( image vs container, layer caching, etc... )
+    * practical basics
+        ( docker buildx build, docker ps, docker image, etc... )
+    * using volume mounts ( i <3 volume mounts!!! )
+    * using port maps
+    * running fricken arch linux in docker ( the backend runs in arch btw... ) 
+    * multistage builds and how they make things SMOL
+    * docker compose ( i fricken LOVE docker compose!!! )
+      intercontainer networking by service name ( this is really cool )
 
-IMAGEMAGICK / IMAGICK
+  [ sqlite ]
+    ( also my first time doing proper db stuff...! )
 
-- MagickWand initialization
-- Reading and writing images
-- Format conversion (HEIC to PNG)
-- Resizing with aspect ratio
-- Nearest neighbor vs Lanczos filtering
-- Extent/crop to square
-- pkg-config and CGO flags
+    * the conceptual basics ( why sqlite? it's a single file, it requires no conn, etc. )
+    * the practical basics 
+      ( creating table, queriying, inserting, deleting, renaming stuff... )
+    * using db browser for sqlite ( gui browser )
+    * using sqlite3 cli
 
-SQLITE
+      also did some mysql ( mariadb? ) 
+        and learned a bit about it before switching to squeelite:
 
-- Setup and schema design
-- SQL queries (SELECT, INSERT, DELETE)
-- go-sqlite3 driver
-- DB Browser for SQLite
-- Deleting all rows from a table
-- Renaming a column with ALTER TABLE
+        * set up mysql and connect to it
 
-AUTH
+  [ image processing with imagemagick / using a c api in go ]
 
-- JWT tokens
-- Signing and verification
-- Auth middleware
-- Cookie vs localStorage
+    * the patterns of using c bindings within go
+    * using magickwands correctly ( one per image! )
+    * various processing stuff
+        ( format conversion, resizing calculations, dealing with heic... )
+    * making all of this into a service
+    * pkgconfig
+  
+  [ arch linux/linux in general ]
+    
+    * landlock kernel feature and how pacman uses it to keep packinstalls secure
+        ( pacman is the sickest package manager and it's not even close )
 
-DOCKER
+  [ ci/cd; github actions ]
 
-- Images vs containers
-- Dockerfile instructions
-- Layer caching
-- Volume mounts
-- Port mapping
-- Platform differences (ARM vs x86)
-- Multi-stage builds and why they matter
-- Running and executing containers
-- Arch Linux in Docker
-- pacman sandboxing issues
-- npm ci vs npm install
-- Building inside vs outside containers
-- Executing a shell inside a running container with docker compose exec
+    * setting up a simple deploy job ( ssh and deploy! )
+      environment vs. repo secrets
 
-DOCKER COMPOSE
+  [ hosting on a hetzner server with a domain ]
+ 
+    * setting up a hetzner vps with docker
+    * setting up a subdomain to point to it
+    * dealing with ssh keys
+        known_hosts and authorized_keys
+    * using recovery mode ( i suffered greatly... )
+    * the realization that ipv6 is still pretty unsupported and using ipv4
+      will save you years of life
+    * doing normal ssh/hosting stuff in ipv6
 
-- Service definitions
-- Port mapping (host:container)
-- Volume bind mounts for persistent data
-- Inter-container networking by service name
-- depends_on
-- Rebuilding with --build
+  __                 _                 _ 
+ / _|_ __ ___  _ __ | |_ ___ _ __   __| |
+| |_| '__/ _ \| '_ \| __/ _ \ '_ \ / _` |
+|  _| | | (_) | | | | ||  __/ | | | (_| |
+|_| |_|  \___/|_| |_|\__\___|_| |_|\__,_|
+      _________
+    / ======= \
+   / __________\
+  | ___________ |
+  | | -       | |
+  | |         | |
+  | |_________| |________________________
+  \=____________/                        )
+  / """"""""""" \                       /
+ / ::::::::::::: \                  =D-'
+(_________________) 
 
-NGINX
-
-- Reverse proxying to a backend container
-- Serving static files
-- try_files and why each argument exists
-- client_max_body_size for file uploads
-- Proxying API routes
-- HTTPS with certbot
-
-CI/CD
-
-- GitHub Actions for automated deployment
-- SSH deployment to a server
-- GitHub secrets
-
-DEPLOYMENT / NETWORKING
-
-- SSH keys and how they work
-- known_hosts and authorized_keys
-- IPv4 vs IPv6
-- DNS and subdomains
-- Hetzner VPS setup
-- Firewall rules
-
-.    _    +     .  ______   .          .
-  (      /|\      .    |      \      .   +
-      . |||||     _    | |   | | ||         .
- .      |||||    | |  _| | | | |_||    .
-    /\  ||||| .  | | |   | |      |       .
- __||||_|||||____| |_|_____________\__________
- . |||| |||||  /\   _____      _____  .   .
-   |||| ||||| ||||   .   .  .         ________
-  . \|`-'|||| ||||    __________       .    .
-     \__ |||| ||||      .        handcoding 4evr <3
-  __    ||||`-'|||  .       .    __________
- .    . |||| ___/  ___________             .
-    . _ ||||| . _               .   _________
- _   ___|||||__  _ \\--//    .          _
-      _ `---'    .)=\oo|=(.   _   .   .    .
- _  ^      .  -    . \.|
+  * dockerizing an nginx frontend
+  * nginx & configuring a container with it
+      serving static files and handling actual routes ( $uri... )
+      setting up backend proxy ( backend is also dockerized! )
+  * <form>s and sending data over via POSTs!
+  * using localStorage
+  * setting axios default headers
