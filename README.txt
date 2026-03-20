@@ -23,7 +23,7 @@
 
 Welcome!
 
-This is a self-hosted fullstack app built for me to share my drawings, music, 
+This is a fullstack app built for me to share my drawings, music, 
 programming, and just about anything I want 
 ( and have the will to implement infrastructure/UI for! )
 
