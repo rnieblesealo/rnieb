@@ -72,33 +72,27 @@ nginx frontend:
 
 === QUESTIONS ============================================================================
 
-[x] multipart forms?
-[x] what are fileheaders?
-[x] mebibytes?
-[x] go.sum?
-[x] layer caching?
-[x] pkgconfig?
-[x] lanczos filtering? -- an expensive quality-centric image resizing algo
-[x] cors?
-
-[ ] jwts?
-    claims?
-[ ] indirect in go.mod?
-[ ] OPTIONS header?
-[ ] localstorage?
-[ ] xss attack?
-[ ] cookies?
+[ ] authorized_keys + known_hosts?
 [ ] http.handle vs http.handler? ( go ) / protected routes
 [ ] interfaces in go
-[ ] serve mux?
-[ ] delete keyword in typescript?
-[ ] ssh keys + server?
-[ ] if ip is intrinsic to machine how can we reassign them in hetzner dash?
-[ ] resolv.conf?
-[ ] gai.conf?
 [ ] mitm error ???
-[ ] authorized_keys + known_hosts?
-[ ] AS builder dockerfile pattern
+[ ] ssh keys + server?
+[x] AS builder dockerfile pattern ( intermediate build container )
+[x] OPTIONS header?
+[x] cors?
+[x] gai.conf?
+[x] go.sum?
+[x] if ip is intrinsic to machine how can we reassign them in hetzner dash? -- is vps :p
+[x] indirect in go.mod?
+[x] jwts? claims?
+[x] lanczos filtering? -- an expensive quality-centric image resizing algo
+[x] layer caching?
+[x] mebibytes?
+[x] multipart forms?
+[x] pkgconfig?
+[x] resolv.conf?
+[x] serve mux?
+[x] what are fileheaders?
 
 === LEARNING NOTES =======================================================================
 
@@ -117,6 +111,14 @@ nginx frontend:
   if we do go mod download ( e.g. on cloning repo ) that dl is verified against checksum
 * go build -v <---- -v flag shows build output
                      useful for builds that take a while on server 
+* // indirect ( go.mod ) <---- means this dep isn't imported by us in our code, 
+                               but by another 3rd party dependency
+
+* servemux is the thing that maps routes to handles
+    we can either make our own by hand ( NewServeMux ) 
+    and add functions to it specifically
+
+    or use DefaultServeMux ( the one go http creates for us )
 
 --- HOMEBREW -----------------------------------------------------------------------------
 
@@ -183,13 +185,23 @@ pkg-config reads these files and outputs compiler flags and locations of librari
 * imagemagick version 7 only works with golang imagick v3 bindings
   ( ensure you pull the v3 bindings if get missing includes )
 
---- CORS ---------------------------------------------------------------------------------
+--- CORS / OPTIONS -----------------------------------------------------------------------
 
-request goes out
-server receives it
-server attaches access allow origin header to response
-browser receives response and checks this header 
-if the header allows this origin to make request, browser loads response into javascript
+before all nonsimple requests, an OPTIONS preflight request is sent
+  ( e.g. if i do POST /api/ping, OPTIONS /api/ping is sent first )
+  
+the preflight request contains info about the "real" request we're trying to make
+e.g. "Origin" ( our url ) and "Access-Control-Request-Method" ( post? get? )
+
+via cors middleware, the server sends back a response with what it allows
+e.g. the notorious "Access-Control-Allow-Origin" ( the places that it allows to reach it )
+  *** THIS RESPONSE MAY VARY BASED ON OUR OPTIONS INFO!
+      the server may change what it allows based on the request origin or method, 
+      for example
+      
+the client gets this response and checks it
+if the server forbade anything that our request needs to go out 
+the real request isn't allowed to leave
 
 --- PACMAN & LANDLOCK --------------------------------------------------------------------
 
@@ -260,11 +272,41 @@ CONVERSIONS:
 
   ( conversion factor is 2^10 )
 
---- SECURITY -----------------------------------------------------------------------------
+--- AUTHENTICATION -----------------------------------------------------------------------
 
 * generate jwt secrets using ---> openssl -rand -base64 32 
     ( 32 bytes is std. length for HS256 secret encoding )
 
+HOW A JWT WORKS:
+  we define a secret ( 32 bytes is recommended but can be anything )
+  
+  we submit some creds to server ( signup )
+
+  server issues a jwt with claims ( claims = data accompanying the jwt ) such as:
+    * when the token expires
+    * the username that the jwt is for 
+
+  server sends the jwt SIGNED ( but not encrypted! ) using the secret back to client
+    ( base64 decoding a jwt allows us to see the claims -- CAREFUL WITH WHAT THEY ARE! )
+
+  client saves it somewhere
+
+  client sends the jwt under the "Authorization" header 
+  anytime they'd like to access something auth-protected
+
+  server receives the request and tries to decode the jwt with auth middleware
+  it also checks the claims to ensure it's valid ( e.g. is the expiration past? )
+
+  if this fails, the middleware aborts and the main handler isn't run 
+  ( we aren't authorized; issue a 401 )
+
+  if this succeeds, the main handler does run
+
+  NOTES:
+    * RFC 7519 defines standard claims which jwt parsers know to look for
+      "exp" ( expiration date ) and "sub" ( subject; the user id ) are notable
+      in our use case
+ 
 --- HETZNER HOSTING ----------------------------------------------------------------------
 
 honestly i just picked them cuz they don't say ai anywhere in their homepage
@@ -308,7 +350,7 @@ TIPS:
 
   flip scp order to copy from remote to local ( duh... )
 
---- DOMAIN STUFF -------------------------------------------------------------------------
+--- DOMAIN STUFF ( DNS ) -----------------------------------------------------------------
 
 RECORD TYPES:
   A           maps domain -> ip 
@@ -329,6 +371,18 @@ TRR = trusted recursive resolver
   instead of isp directly
 
   isp can't see dns resolution info; this helps do things more privately
+
+gai.conf <----- defines how to prioritize ips when a hostname resolves to multiple ips
+                ( e.g. do i prefer the v4 or v6 addr? )
+
+resolv.conf <-- tells the system where to send dns queries
+                this is typically not edited by hand and 
+                managed by the system 
+
+the server you are running is a VPS ( virtual private server )
+  this means it's a vm, and so things that would be intrinsic to a physical machine
+  ( e.g. an ip address ) can be changed/reassigned 
+  ( they aren't defined by physical hardware )
 
 --- CI/CD --------------------------------------------------------------------------------
 

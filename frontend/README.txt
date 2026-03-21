@@ -52,7 +52,11 @@ stuff i wanna share brainstorm:
 
 --- QUESTIONS ----------------------------------------------------------------------------
 
+[ ] cookies?
 [ ] nginx
+[ ] xss attack?
+[x] delete keyword in typescript?
+[x] localstorage?
 
 --- NOTES --------------------------------------------------------------------------------
 
@@ -68,3 +72,10 @@ stuff i wanna share brainstorm:
 
 * docker containers aren't booted with systemd 
 
+* delete keyword removes a property from an object 
+  e.g. from {"john":1, "mary":2}, delete user.john would remove that property 
+
+--- LOCALSTORAGE -------------------------------------------------------------------------
+
+simple key value store 
+  scoped to origin ( e.g. localhost:3000 can't read what localhost:5173 stored )
