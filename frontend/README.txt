@@ -79,3 +79,22 @@ stuff i wanna share brainstorm:
 
 simple key value store 
   scoped to origin ( e.g. localhost:3000 can't read what localhost:5173 stored )
+
+--- UPGRADING TO HTTPS -------------------------------------------------------------------
+
+certbot can request and generate our cert easily:
+  $ certbot certonly --standalone -d <DOMAIN NAME> <--- spins up verification server
+                                                        gets us our cert and privkey
+  this requires port 80 to be free since http connection is required
+    ( turn off the container! )
+
+  whatever domain name we pass must already point to our ip!
+
+  the certs will live in the vps and will be volumemounted to our frontend container
+
+after we have the certs, we need to mount them to the container & configure nginx
+  ( see nginx.conf; basically need to give it cert paths + configure http redirect )
+
+  for this, our frontend container must expose port 443 ( https )
+
+this should be pretty much it!

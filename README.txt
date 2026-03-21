@@ -21,6 +21,8 @@
 ⠀⠀⢀⠴⠚⠻⢧⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⠞⠉⠉⠓⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠶⠶⠶⣶⣤⣴⡶⠶⠶⠟⠛⠉⠀⠀⠀⠀⠀⠀⠀
 
+------------------------------------------------------------------------------------------
+
 Welcome!
 
 This is a fullstack app built for me to share my drawings, music, 
@@ -48,7 +50,7 @@ Take a look at their respective dirs to read my notes and mini specs on each!
 
 Thank you for visiting :)
 
-OVERVIEW OF WHAT I'VE LEARNED:
+--- OVERVIEW OF WHAT I'VE LEARNED --------------------------------------------------------
   ( see individual frontend and backend readmes for more... )
 
  _                _                  _ 
@@ -161,6 +163,8 @@ OVERVIEW OF WHAT I'VE LEARNED:
   * <form>s and sending data over via POSTs!
   * using localStorage
   * setting axios default headers
+  * obtaining an ssl certificate & installing it to containerized nginx frontend
+    ( certbot )
 
 --- DEV SETUP ---------------------------------------------------------------------------
 
