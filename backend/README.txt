@@ -167,6 +167,9 @@ nginx frontend:
 * docker compose up --build       <---- rebuild this time!
 * docker compose up <servicename> <----- only compose one of the services
 
+* when using FROM, use the exact same label as is on dockerhub
+  ( even if it varies between / and )
+
 --- PKGCONFIG ----------------------------------------------------------------------------
 
 tells compilers where to find libraries' HEADER FILES and what COMPILER FLAGS they need 
