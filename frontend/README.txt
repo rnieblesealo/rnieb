@@ -65,3 +65,6 @@ stuff i wanna share brainstorm:
     
 * ALPINE LINUX is a very VERY ( 5mb!!! ) distro that doesn't even have coreutils
   if we want certbot, we'll need something like ubuntu for some package managin'!
+
+* docker containers aren't booted with systemd 
+
