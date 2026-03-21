@@ -10,8 +10,12 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "80:80" # "host:container"; don't use 80 on the host since it's probably in use
+      - "80:80" # expose http port
+      - "443:443" # expose https port
     depends_on:
       - backend
 
-        # port 80 is the default http port, that's why we use it
+        # port 80 is the default http port
+        # won't work on localhost since it's probably already being used by smth else
+        # port 443 is https
+        # same deal on localhost
