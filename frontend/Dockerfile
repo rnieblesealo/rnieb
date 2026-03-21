@@ -10,3 +10,17 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# certbot
+# adapted from
+# https://certbot.eff.org/instructions?ws=nginx&os=snap
+
+# install certbot
+RUN snap install --classic certbot
+
+# make sure binary can be used systemwide
+RUN ln -s /snap/bin/certbot /usr/local/bin/certbot
+
+# have certbot edit nginx.conf to add https config
+# ( see README to see what this'd look like )
+RUN certbot --nginx
