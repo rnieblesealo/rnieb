@@ -16,7 +16,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # https://certbot.eff.org/instructions?ws=nginx&os=snap
 
 # install snap ( not present in ubuntu/nginx )
-RUN sudo apt update && sudo apt install snapd
+RUN apt update && apt install snapd
 
 # install certbot
 RUN snap install --classic certbot
