@@ -62,3 +62,6 @@ stuff i wanna share brainstorm:
 * --classic on snap disables sandboxing ( similar to pacman --disable-sandbox )
 * certbot needs server_name ( the domain name! ) nginx config to be set
     this is how it knows what to issue a certificate for!
+    
+* ALPINE LINUX is a very VERY ( 5mb!!! ) distro that doesn't even have coreutils
+  if we want certbot, we'll need something like ubuntu for some package managin'!
