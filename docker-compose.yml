@@ -10,7 +10,10 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "80:80" # "host:container"; don't use 80 on the host since it's probably in use
+      - "80:80" # "host:container"; http
+      - "80:443" # https
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro # ro == readonly
     depends_on:
       - backend
 
