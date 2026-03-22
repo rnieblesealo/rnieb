@@ -17,6 +17,7 @@ jobs:
           passphrase: ${{ secrets.SERVER_SSH_KEY_PASSPHRASE }}
           script: | # all of this is standard stuff we do by hand
             cd /root/rnieb/
+            git branch main
             git pull
             docker compose up --build -d
 
