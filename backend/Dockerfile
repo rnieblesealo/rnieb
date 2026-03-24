@@ -21,6 +21,7 @@ RUN pacman -S --noconfirm --disable-sandbox \
   ffmpeg \
   rav1e \
   libheif \
+  libx264 \ 
   sqlite
 
 # copy go files first for better layer caching

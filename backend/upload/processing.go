@@ -2,6 +2,7 @@ package upload
 
 import (
 	"fmt"
+	"github.com/u2takey/ffmpeg-go"
 	"gopkg.in/gographics/imagick.v3/imagick"
 	"os"
 	"path/filepath"
@@ -9,8 +10,10 @@ import (
 )
 
 const (
-	TARGET_WIDTH               = 500
-	TARGET_COMPRESSION_QUALITY = 50
+	TARGET_IMAGE_WIDTH               = 500
+	TARGET_IMAGE_COMPRESSION_QUALITY = 50
+	TARGET_VIDEO_WIDTH               = 400
+	TARGET_VIDEO_CRF                 = 28 // This is basically compression rate
 )
 
 // Converts the image at the given path to PNG with TARGET_COMPRESSION_QUALITY applied
@@ -36,7 +39,7 @@ func ConvertToPNG(imagePath string) (string, error) {
 
 	// Set compression quality
 
-	mw.SetImageCompressionQuality(TARGET_COMPRESSION_QUALITY)
+	mw.SetImageCompressionQuality(TARGET_IMAGE_COMPRESSION_QUALITY)
 
 	// Write the result with the correct PNG extension
 
@@ -88,7 +91,7 @@ func ResizePNG(imagePath string) (string, error) {
 	width := mw.GetImageWidth()
 	height := mw.GetImageHeight()
 
-	var convFactor float32 = TARGET_WIDTH / float32(width)
+	var convFactor float32 = TARGET_IMAGE_WIDTH / float32(width)
 
 	mw.ResizeImage(
 		uint(float32(width)*convFactor),
@@ -104,4 +107,42 @@ func ResizePNG(imagePath string) (string, error) {
 	}
 
 	return imagePath, nil
+}
+
+// Proportionally scale video to TARGET_VIDEO_WIDTH
+// Then reencode as H264 with new CBF ( TARGET_VIDEO_CBF )
+func ResizeAndCompressVideo(videoPath string) (string, error) {
+	// Get new filename and path ( just changes extension )
+
+	newFilename := fmt.Sprintf("%s.mp4", // Change ext to tell ffmpeg to reformat
+		strings.TrimSuffix(filepath.Base(videoPath), filepath.Ext(videoPath)))
+	newFilepath := filepath.Join(filepath.Dir(videoPath), newFilename)
+
+	// Run ffmpeg
+
+	err := ffmpeg_go.Input(videoPath).Filter("scale",
+		ffmpeg_go.Args{
+			"w=500:h=-2", // -2 makes sure resulting height % 2 == 0 which h264 requires
+		}).Output(newFilepath, ffmpeg_go.KwArgs{ // Change ext here for new format
+		"vcodec": "libx264",                           // Select libx264 ( H264 codec )
+		"crf":    fmt.Sprintf("%d", TARGET_VIDEO_CRF), // Set constant rate factor to 28
+	}).Run()
+
+	// NOTE: I tried H265 which is supposedly newer better but that shit dont work
+	// ( QuickTime couldnt open the output )
+
+	if err != nil {
+		// ffmpeg will always create the file, if it fails it just leaves it as is
+		// We must get rid of this junk file
+		os.Remove(newFilepath)
+
+		// Leave the original video since we still may wanna work with it
+		// TODO: change this?
+
+		return "", fmt.Errorf("ResizeAndCompressVideo: %s", err)
+	}
+
+	os.Remove(videoPath) // Get rid of original video since we processed it
+
+	return videoPath, nil
 }
