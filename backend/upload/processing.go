@@ -122,7 +122,8 @@ func ResizeAndCompressVideo(videoPath string) (string, error) {
 
 	err := ffmpeg_go.Input(videoPath).Filter("scale",
 		ffmpeg_go.Args{
-			"w=500:h=-2", // -2 makes sure resulting height % 2 == 0 which h264 requires
+			fmt.Sprintf("w=%d:h=-2", TARGET_VIDEO_WIDTH),
+			// -2 makes sure resulting height % 2 == 0 which h264 requires
 		}).Output(newFilepath, ffmpeg_go.KwArgs{ // Change ext here for new format
 		"vcodec": "libx264",                           // Select libx264 ( H264 codec )
 		"crf":    fmt.Sprintf("%d", TARGET_VIDEO_CRF), // Set constant rate factor to 28
@@ -137,7 +138,6 @@ func ResizeAndCompressVideo(videoPath string) (string, error) {
 		os.Remove(newFilepath)
 
 		// Leave the original video since we still may wanna work with it
-		// TODO: change this?
 
 		return "", fmt.Errorf("ResizeAndCompressVideo: %s", err)
 	}
