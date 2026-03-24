@@ -147,7 +147,8 @@ func main() {
 	// Setup upload handlers (auth-protected)
 
 	http.Handle("/api/ping", upload.Ping("Marco? Polo!"))
-	http.Handle("/api/upload", authMiddleware(upload.Upload(db, uploadPath)))
+	http.Handle("/api/upload", authMiddleware(upload.UploadImage(db, uploadPath)))
+	http.Handle("/api/upload-video", authMiddleware(upload.UploadVideo(uploadPath)))
 
 	// Setup fetch handlers
 

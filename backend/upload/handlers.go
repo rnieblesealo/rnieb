@@ -30,7 +30,7 @@ func Ping(message string) http.HandlerFunc {
 }
 
 // Handles image uploads
-func Upload(db *sql.DB, uploadPath string) http.HandlerFunc {
+func UploadImage(db *sql.DB, uploadPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		// Parse request form
 
@@ -208,6 +208,159 @@ func Upload(db *sql.DB, uploadPath string) http.HandlerFunc {
 		common.RNRespond(
 			w,
 			fmt.Sprintf("Successfully uploaded and processed %s", pngImageFilepath),
+			nil,
+			http.StatusOK)
+	}
+}
+
+// Handles video uploads
+func UploadVideo(uploadPath string) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		// Parse request form
+
+		err := req.ParseMultipartForm(MAX_FORM_SIZE)
+		if err != nil {
+			common.RNRespond(w, fmt.Sprintf("Failed to parse form: %s", err), nil, http.StatusBadRequest)
+			return
+		}
+
+		// Get request form values
+
+		// videoName := req.FormValue("name")
+		// videoDescription := req.FormValue("description")
+
+		_, videoFileHandle, err := req.FormFile("file")
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Failed to obtain file handle: %s", err),
+				nil,
+				http.StatusBadRequest)
+
+			return
+		}
+
+		// Open
+
+		file, err := videoFileHandle.Open()
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Failed to open file: %s", err),
+				nil,
+				http.StatusBadRequest)
+
+			return
+		}
+
+		defer file.Close()
+
+		// Read first 512 bytes of the file to obtain MIME type
+
+		buf := make([]byte, 512)
+		_, err = file.Read(buf)
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Failed to read file MIME: %s", err),
+				nil,
+				http.StatusBadRequest)
+
+			return
+		}
+
+		// Only really gonna be uploading vids taken on iPhone
+		// .mov is Apple's thing; goes under QuickTime
+		// Might extend so leaving as array
+
+		allowedMimeTypes := []string{
+			"video/quicktime",
+		}
+
+		mimeType := mimetype.Detect(buf).String()
+		if !mimetype.EqualsAny(mimeType, allowedMimeTypes...) {
+			common.RNRespond(w, "Uploaded file must be MOV", nil, http.StatusBadRequest)
+			return
+		}
+
+		// Move read cursor to beginning of file
+
+		_, err = file.Seek(0, io.SeekStart)
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Failed to seek: %s", err),
+				nil,
+				http.StatusInternalServerError)
+
+			return
+		}
+
+		// Create uploads dir if not in already
+
+		err = os.MkdirAll(uploadPath, os.ModePerm)
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Failed to create uploads dir: %s", err),
+				nil,
+				http.StatusInternalServerError)
+
+			return
+		}
+
+		// Create the video file
+		// UNIX nano name
+
+		videoFilepath :=
+			fmt.Sprintf("%s/%d%s",
+				uploadPath,
+				time.Now().UnixNano(),
+				filepath.Ext(videoFileHandle.Filename))
+
+		videoFile, err := os.Create(videoFilepath)
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Failed to create image file: %s", err),
+				nil,
+				http.StatusInternalServerError)
+
+			return
+		}
+		defer videoFile.Close()
+
+		// Write file contents from form
+
+		_, err = io.Copy(videoFile, file)
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Failed to write file contents: %s", err),
+				nil,
+				http.StatusInternalServerError)
+
+			return
+		}
+
+		// Process the video
+
+		mp4VideoFilepath, err := ResizeAndCompressVideo(videoFilepath)
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Failed to process file: %s", err),
+				nil,
+				http.StatusInternalServerError)
+
+			return
+		}
+
+		// Success response
+
+		common.RNRespond(
+			w,
+			fmt.Sprintf("Successfully uploaded and processed %s", mp4VideoFilepath),
 			nil,
 			http.StatusOK)
 	}
