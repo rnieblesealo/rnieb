@@ -148,7 +148,7 @@ func main() {
 
 	http.Handle("/api/ping", upload.Ping("Marco? Polo!"))
 	http.Handle("/api/upload", authMiddleware(upload.UploadImage(db, uploadPath)))
-	http.Handle("/api/upload-video", authMiddleware(upload.UploadVideo(uploadPath)))
+	http.Handle("/api/upload-video", upload.UploadVideo(db, uploadPath))
 
 	// Setup fetch handlers
 

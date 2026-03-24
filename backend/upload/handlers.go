@@ -214,7 +214,7 @@ func UploadImage(db *sql.DB, uploadPath string) http.HandlerFunc {
 }
 
 // Handles video uploads
-func UploadVideo(uploadPath string) http.HandlerFunc {
+func UploadVideo(db *sql.DB, uploadPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		// Parse request form
 
@@ -226,8 +226,8 @@ func UploadVideo(uploadPath string) http.HandlerFunc {
 
 		// Get request form values
 
-		// videoName := req.FormValue("name")
-		// videoDescription := req.FormValue("description")
+		videoName := req.FormValue("name")
+		videoDescription := req.FormValue("description")
 
 		_, videoFileHandle, err := req.FormFile("file")
 		if err != nil {
@@ -350,6 +350,21 @@ func UploadVideo(uploadPath string) http.HandlerFunc {
 			common.RNRespond(
 				w,
 				fmt.Sprintf("Failed to process file: %s", err),
+				nil,
+				http.StatusInternalServerError)
+
+			return
+		}
+
+		// Create entry in DB
+		_, err = db.Exec(`
+			INSERT INTO skateclips (name, description, filename)
+			VALUES (?, ?, ?)	
+	`, videoName, videoDescription, filepath.Base(mp4VideoFilepath))
+		if err != nil {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Failed to insert image into DB: %s", err),
 				nil,
 				http.StatusInternalServerError)
 
