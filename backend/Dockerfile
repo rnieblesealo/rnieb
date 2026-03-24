@@ -3,14 +3,16 @@ FROM lopsided/archlinux:devel
 # working directory inside container
 WORKDIR /app
 
-# update mirrors 
-RUN pacman -Sy --noconfirm --disable-sandbox
+# sync mirrors 
+# update system packs
+# install my deps
 
-# update system packages
-RUN pacman -Su --noconfirm --disable-sandbox
-
-# install my dependencies
-RUN pacman -S --noconfirm --disable-sandbox \
+# run as one command; sy step might be cached which causes -s to fail 
+# ( no sync took place )
+RUN  \
+  pacman -Sy --noconfirm --disable-sandbox && \
+  pacman -Su --noconfirm --disable-sandbox && \
+  pacman -S --noconfirm --disable-sandbox \
   go \
   gcc \
   pkg-config \
