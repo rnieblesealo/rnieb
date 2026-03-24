@@ -19,7 +19,15 @@
  / ::::::::::::: \                  =D-'
 (_________________) 
 
---- SPECS --------------------------------------------------------------------------------
+=== QUESTIONS ============================================================================
+
+[ ] cookies?
+[ ] nginx
+[ ] xss attack?
+[x] delete keyword in typescript?
+[x] localstorage?
+
+=== BRAINSTORM / SPEC ====================================================================
 
 stuff i wanna share brainstorm:
   * drawings ( kinda done already )
@@ -50,15 +58,7 @@ stuff i wanna share brainstorm:
   * my music
       link bandcamp for now; figure out how to do a proper page for it later
 
---- QUESTIONS ----------------------------------------------------------------------------
-
-[ ] cookies?
-[ ] nginx
-[ ] xss attack?
-[x] delete keyword in typescript?
-[x] localstorage?
-
---- NOTES --------------------------------------------------------------------------------
+=== GENERAL NOTES ========================================================================
 
 * npm ci <---- npm install but stricter for ci environments
 * client-max-body-size ( config ) <----- set max post size ( default is 1mb )
@@ -75,12 +75,12 @@ stuff i wanna share brainstorm:
 * delete keyword removes a property from an object 
   e.g. from {"john":1, "mary":2}, delete user.john would remove that property 
 
---- LOCALSTORAGE -------------------------------------------------------------------------
+=== LOCALSTORAGE =========================================================================
 
 simple key value store 
   scoped to origin ( e.g. localhost:3000 can't read what localhost:5173 stored )
 
---- UPGRADING TO HTTPS -------------------------------------------------------------------
+=== UPGRADING TO HTTPS ===================================================================
 
 certbot can request and generate our cert easily:
   $ certbot certonly --standalone -d <DOMAIN NAME> <--- spins up verification server

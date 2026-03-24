@@ -15,6 +15,32 @@
 \___________________________\/
  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
 
+=== QUESTIONS ============================================================================
+
+[ ] authorized_keys + known_hosts?
+[ ] http.handle vs http.handler? ( go ) / protected routes
+[ ] interfaces in go
+[ ] mitm error ???
+[ ] ssh keys + server?
+[x] AS builder dockerfile pattern ( intermediate build container )
+[x] OPTIONS header?
+[x] cors?
+[x] gai.conf?
+[x] go.sum?
+[x] if ip is intrinsic to machine how can we reassign them in hetzner dash? -- is vps :p
+[x] indirect in go.mod?
+[x] jwts? claims?
+[x] lanczos filtering? -- an expensive quality-centric image resizing algo
+[x] layer caching?
+[x] mebibytes?
+[x] multipart forms?
+[x] pkgconfig?
+[x] resolv.conf?
+[x] serve mux?
+[x] what are fileheaders?
+
+=== SPEC ( not really a spec just braindump ) ============================================
+
 for now this only consists of an image processing service:
 1. we upload a heic image to server
 2. server receives image ( written to disk )
@@ -29,9 +55,9 @@ we will also resize the image such that its width is always 500 ( for storage pu
 
       1280 / 600 = 2.1333 aspect
 
-	    resize relative to width:
+    resize relative to width:
 
-	    target width / actual width = conv factor
+    target width / actual width = conv factor
       500/1280 = 0.390625
       
       1280 * 0.390625 = 500 
@@ -70,33 +96,7 @@ we should really upgrade to AS BUILDER pattern
 nginx frontend:
   since /api/ is proxied to backend, backend routes must be prefixed with /api/
 
-=== QUESTIONS ============================================================================
-
-[ ] authorized_keys + known_hosts?
-[ ] http.handle vs http.handler? ( go ) / protected routes
-[ ] interfaces in go
-[ ] mitm error ???
-[ ] ssh keys + server?
-[x] AS builder dockerfile pattern ( intermediate build container )
-[x] OPTIONS header?
-[x] cors?
-[x] gai.conf?
-[x] go.sum?
-[x] if ip is intrinsic to machine how can we reassign them in hetzner dash? -- is vps :p
-[x] indirect in go.mod?
-[x] jwts? claims?
-[x] lanczos filtering? -- an expensive quality-centric image resizing algo
-[x] layer caching?
-[x] mebibytes?
-[x] multipart forms?
-[x] pkgconfig?
-[x] resolv.conf?
-[x] serve mux?
-[x] what are fileheaders?
-
-=== LEARNING NOTES =======================================================================
-
---- MULTIPART FORMS ----------------------------------------------------------------------
+=== MULTIPART FORMS ======================================================================
 
 * essentially just data grouped by names
   if two things share the same name, they are grouped under that name as a list
@@ -104,7 +104,7 @@ nginx frontend:
   we use this to open the file itself
 * interface{} is used to define a catchall type
 
---- GOLANG -------------------------------------------------------------------------------
+=== GOLANG ===============================================================================
 
 * go.sum stores checksums of project deps
   on first go get, checksum is computed and stored here
@@ -120,13 +120,13 @@ nginx frontend:
 
     or use DefaultServeMux ( the one go http creates for us )
 
---- HOMEBREW -----------------------------------------------------------------------------
+=== HOMEBREW =============================================================================
 
 * brew install --cask <--- homebrew-cask is an extension for gui apps
 * init() function is like main() but for go modules; runs on import 
   don't use this to defer cleanups!
 
---- DOCKER -------------------------------------------------------------------------------
+=== DOCKER ===============================================================================
 
 * docker image = blueprint
          container = running instance of image
@@ -185,7 +185,7 @@ pkg-config reads these files and outputs compiler flags and locations of librari
 * imagemagick version 7 only works with golang imagick v3 bindings
   ( ensure you pull the v3 bindings if get missing includes )
 
---- CORS / OPTIONS -----------------------------------------------------------------------
+=== CORS / OPTIONS =======================================================================
 
 before all nonsimple requests, an OPTIONS preflight request is sent
   ( e.g. if i do POST /api/ping, OPTIONS /api/ping is sent first )
@@ -222,7 +222,7 @@ as such, we must DISABLE SANDBOXING to get pacman to work in docker
 this is still SECURE;
 the container is already a layer of sandboxing on its own!
 
---- MYSQL --------------------------------------------------------------------------------
+=== MYSQL ================================================================================
 
 mysql is now MARIADB ( damn... )
 
@@ -237,7 +237,7 @@ mysql -u root               <---- connect to mysql server as root
 
 ( didn't continue using, but have notes for fun! )
 
---- MEBI VS MEGABYTES --------------------------------------------------------------------
+=== MEBI VS MEGABYTES ====================================================================
 
 hardware makers used standard meaning of mega ( 10^6 )
 software, however, uses powers of 2 ( because binary! )
@@ -272,7 +272,7 @@ CONVERSIONS:
 
   ( conversion factor is 2^10 )
 
---- AUTHENTICATION -----------------------------------------------------------------------
+=== AUTHENTICATION =======================================================================
 
 * generate jwt secrets using ---> openssl -rand -base64 32 
     ( 32 bytes is std. length for HS256 secret encoding )
@@ -307,7 +307,7 @@ HOW A JWT WORKS:
       "exp" ( expiration date ) and "sub" ( subject; the user id ) are notable
       in our use case
  
---- HETZNER HOSTING ----------------------------------------------------------------------
+=== HETZNER HOSTING ======================================================================
 
 honestly i just picked them cuz they don't say ai anywhere in their homepage
 
@@ -350,7 +350,7 @@ TIPS:
 
   flip scp order to copy from remote to local ( duh... )
 
---- DOMAIN STUFF ( DNS ) -----------------------------------------------------------------
+=== DOMAIN STUFF ( DNS ) =================================================================
 
 RECORD TYPES:
   A           maps domain -> ip 
@@ -384,7 +384,7 @@ the server you are running is a VPS ( virtual private server )
   ( e.g. an ip address ) can be changed/reassigned 
   ( they aren't defined by physical hardware )
 
---- CI/CD --------------------------------------------------------------------------------
+=== CI/CD ================================================================================
 
 github actions go under .github/workflows/
 
@@ -395,3 +395,111 @@ add workflow_dispatch to add manual action trigger button
 
 need to add passphrase as well
   don't use these for cicd since the key itself is already secret; passphrase not needed
+
+=== WORKING WITH VIDEO ===================================================================
+
+--- VIDEO ENCODING VS VIDEO FORMAT -------------------------------------------------------
+
+ENCODING -> compression of video + audio data using codecs
+  videos/audio can be huge
+  need to cut the fat 
+
+CODEC = encoder program
+  implements algorithm that cuts the fat
+
+encoded vid/audio is arranged into a format
+
+FORMAT -> how we arrange the encoded data in a file
+  all formats do video + audio
+  but some only support certain codecs
+           do metadata
+           support subtitles
+           implement error recovery
+           etc.
+
+i.e. the format adds stuff on top
+
+since the format arranges encoded data, we say shit like
+"h.264 encoding IN mp4"
+
+KEY TRADEOFF: encoding time vs. video size
+  LONG encoding time means more computation/encode time,
+  but SMALLER ( slash better looking ) result
+
+( e.g. av1 takes a LOT of compute to encode,
+  but the result looks good and is small )
+
+--- HOW DOES STREAMING WORK OVER HTTP? ---------------------------------------------------
+
+with RANGE REQUESTS:
+  we GET a range of bytes of video at a time
+  browser plays what it has while it GETs remaining parts in bg
+
+  <video> elem implements range requests
+  golang's http.FileServer implements range responses
+
+  ( i.e. the hard shit is done for us! yay! )
+
+how BUFFERING works:
+  we can't store entire video file; takes too much space ( max. 50-100mb of buf space )
+  browser deletes chunks we've already seen
+  BUT it keeps chunks closest to our current position in buffer
+    ( a little bit behind, the curr pos, and a little ahead )
+
+  browser has x mb of buffer space
+  once memory pressure hits ranges get deleted
+    ( see video.buffered )
+
+how CHUNKS ARE MAPPED:
+  ranges/chunks are mapped as <timerange> : <byterange> 
+    ( makes sense... )
+
+    e.g.
+      0:00-0:30 : bytes 0 - 1024
+
+      if we SEEK to 0:15,
+      we will pull the entire 0:00-0:30 chunk since it's what contains our timestamp
+
+  we can set the KEYFRAME INTERVAL ( chunk size ) ourselves at encoding time with ffmpeg
+    ( ffmpeg ..... -g 48 would make chunks of 48 frames )
+    timestamp keys and byte range values get computed from this
+
+  because frames differ in size depending on how much is going on, 
+  byte ranges may vary ( time ones don't )
+
+  framerate also factors into this
+
+--- ALL ABOUT BITRATE --------------------------------------------------------------------
+
+bitrate = amt. of data in a second of video;
+  total file size ( mb ? ) / duration in seconds
+
+there is VARIABLE BITRATE
+         and CONSTANT BITRATE
+
+CONSTANT BITRATE uses same amount of bits per frame
+  consistent quality BUT less complex frames waste bits we could be giving to 
+  more complex frames
+
+VARIABLE BITRATE changes amt. of bits given to diff frames
+  each frame gets what it needs!
+
+CONSTANT = more predictable, less efficient
+VARIABLE = less predictable, more efficient
+
+the ENCODER handles bitrate
+  it's given a fixed amt. of bits a second of video may use 
+  it must then decide what frames in that sec get more and get less data
+
+    ( the size / time gives an average, really... ) 
+
+we can specify CBR or VBR and set the target size per sec w/ffmpeg
+  CBR takes a specific size per interval 
+  VBR takes a quality param since this size may vary
+
+** fun side note **
+  STREAMING uses cbr for predictability
+      when frames get too complex distortion happens 
+      ( too little bits for complexity of img )
+
+      this is what happens when streamers complain abt. bitrate :)
