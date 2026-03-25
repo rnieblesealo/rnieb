@@ -16,9 +16,10 @@ const (
 	TARGET_VIDEO_CRF                 = 28 // This is basically compression rate
 )
 
+// All functions return the filepath of the newly processed file
+// If something failed or no new file was created, the original filepath is returned
+
 // Converts the image at the given path to PNG with TARGET_COMPRESSION_QUALITY applied
-// Returns the converted PNG's filepath
-// This filepath is the original filename but with a .png extension instead
 func ConvertToPNG(imagePath string) (string, error) {
 	// Create MagickWand
 	/* One wand per edited image is expected, create + destroy MW has low overhead */
@@ -30,7 +31,7 @@ func ConvertToPNG(imagePath string) (string, error) {
 
 	err := mw.ReadImage(imagePath)
 	if err != nil {
-		return "", fmt.Errorf("ConvertToPNG: Failed to read image: %s", err)
+		return imagePath, fmt.Errorf("ConvertToPNG: Failed to read image: %s", err)
 	}
 
 	// Set conversion format
@@ -45,12 +46,11 @@ func ConvertToPNG(imagePath string) (string, error) {
 
 	newFilename := fmt.Sprintf("%s.png",
 		strings.TrimSuffix(filepath.Base(imagePath), filepath.Ext(imagePath)))
-
 	newFilepath := filepath.Join(filepath.Dir(imagePath), newFilename)
 
 	err = mw.WriteImage(newFilepath)
 	if err != nil {
-		return "", fmt.Errorf("ConvertToPNG: Failed to write image: %s", err)
+		return imagePath, fmt.Errorf("ConvertToPNG: Failed to write image: %s", err)
 	}
 
 	// Remove the original unconverted image
@@ -60,6 +60,7 @@ func ConvertToPNG(imagePath string) (string, error) {
 	return newFilepath, nil
 }
 
+// Resizes PNG to TARGET_IMAGE_WIDTH
 func ResizePNG(imagePath string) (string, error) {
 	// Start wand
 
@@ -74,14 +75,14 @@ func ResizePNG(imagePath string) (string, error) {
 
 	err := mw.ReadImage(imagePath)
 	if err != nil {
-		return "", fmt.Errorf("ResizePNG: Failed to read image: %s", err)
+		return imagePath, fmt.Errorf("ResizePNG: Failed to read image: %s", err)
 	}
 
 	// Ensure is PNG
 
 	format := mw.GetImageFormat()
 	if format != "PNG" {
-		return "", fmt.Errorf(
+		return imagePath, fmt.Errorf(
 			"ResizePNG: Only PNG images are allowed (received %s)\n",
 			format)
 	}
@@ -103,7 +104,7 @@ func ResizePNG(imagePath string) (string, error) {
 
 	err = mw.WriteImage(imagePath)
 	if err != nil {
-		return "", fmt.Errorf("ConvertToPNG: Failed to write image: %s", err)
+		return imagePath, fmt.Errorf("ConvertToPNG: Failed to write image: %s", err)
 	}
 
 	return imagePath, nil
@@ -139,10 +140,10 @@ func ResizeAndCompressVideo(videoPath string) (string, error) {
 
 		// Leave the original video since we still may wanna work with it
 
-		return "", fmt.Errorf("ResizeAndCompressVideo: %s", err)
+		return videoPath, fmt.Errorf("ResizeAndCompressVideo: %s", err)
 	}
 
 	os.Remove(videoPath) // Get rid of original video since we processed it
 
-	return videoPath, nil
+	return newFilepath, nil
 }

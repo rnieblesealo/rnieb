@@ -7,29 +7,44 @@ import (
 	"os"
 	"path/filepath"
 	"rnieb/common"
+	"slices"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Drawing struct {
+type Media struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Path        string `json:"path"`
 }
 
-func GetDrawings(db *sql.DB) http.HandlerFunc {
+// Gets all media of the specified type
+func GetAllMediaOfType(db *sql.DB, mediaType string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Query for all rows of drawings table
-		/* Only include the id, name, description and path, no need for creation date */
+
+		// Ensure passed type is allowed!
+
+		if !slices.Contains(common.GetAllowedDBMediaTypes(), mediaType) {
+			common.RNRespond(
+				w,
+				fmt.Sprintf("Illegal media type '%s'", mediaType),
+				nil,
+				http.StatusBadRequest,
+			)
+
+			return
+		}
+
+		// Query for all media of that type
 
 		rows, err := db.Query(`
-			SELECT id, name, description, filename FROM drawings
-	`)
+    	SELECT id, name, description, filename FROM media WHERE type = ?
+		`, mediaType)
 		if err != nil {
 			common.RNRespond(
 				w,
-				fmt.Sprintf("Drawings query error: %s", err),
+				fmt.Sprintf("Error getting media: %s", err),
 				nil,
 				http.StatusInternalServerError,
 			)
@@ -38,35 +53,34 @@ func GetDrawings(db *sql.DB) http.HandlerFunc {
 		}
 		defer rows.Close() // Query results are kept open; we must close them
 
-		// Marshal list of drawings using a go type
+		// Marshal list of media
 
-		var drawings []Drawing
+		var media []Media
 
 		for rows.Next() {
-			var drawing Drawing
+			var mediaItem Media
 
 			rows.Scan(
-				&drawing.ID,
-				&drawing.Name,
-				&drawing.Description,
-				&drawing.Path,
+				&mediaItem.ID,
+				&mediaItem.Name,
+				&mediaItem.Description,
+				&mediaItem.Path,
 			) // Values are scanned into Go with closest type to the DB's
 
-			drawings = append(drawings, drawing)
+			media = append(media, mediaItem)
 		}
 
 		common.RNRespond(
 			w,
-			"Successfully retrieved drawings",
-			drawings,
+			fmt.Sprintf("Successfully retrieved all media of type '%s'", mediaType),
+			media,
 			http.StatusOK,
 		)
-
 	}
 }
 
-// Deletes a drawing and its file
-func DeleteDrawing(db *sql.DB, uploadPath string) http.HandlerFunc {
+// Deletes media by ID from the upload path
+func DeleteMedia(db *sql.DB, uploadPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		// Get the deletion ID from URL params
 
@@ -77,7 +91,7 @@ func DeleteDrawing(db *sql.DB, uploadPath string) http.HandlerFunc {
 		var deletionImageFilename string
 		db.QueryRow(`
 		SELECT filename 
-		FROM drawings
+		FROM media 
 		WHERE id = ?
 		`, deletionID).Scan(&deletionImageFilename) // NOTE: Only db.Query requires closing
 
@@ -98,7 +112,7 @@ func DeleteDrawing(db *sql.DB, uploadPath string) http.HandlerFunc {
 		// Delete the record from the DB
 
 		_, err = db.Exec(`
-		DELETE FROM drawings WHERE id = ?	
+		DELETE FROM media WHERE id = ?	
 	`, deletionID)
 		if err != nil {
 			common.RNRespond(
@@ -110,10 +124,12 @@ func DeleteDrawing(db *sql.DB, uploadPath string) http.HandlerFunc {
 			return
 		}
 
+		// Respond successfully
+
 		common.RNRespond(
 			w,
 			fmt.Sprintf(
-				"Successfully deleted ID %s with image %s",
+				"Successfully deleted ID %s ( file: %s )",
 				deletionID,
 				deletionImageFilename),
 			nil,

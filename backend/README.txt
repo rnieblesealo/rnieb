@@ -308,6 +308,9 @@ mysql -u root               <---- connect to mysql server as root
            select <-------------- will automatically use indices if created
            explain query plan <-- can tell us if the select will use an index
 
+* do NOT use sprintf for queries
+  vulnerable to sql injection
+
 === MEBI VS MEGABYTES ====================================================================
 
 hardware makers used standard meaning of mega ( 10^6 )

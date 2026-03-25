@@ -29,8 +29,14 @@ func Ping(message string) http.HandlerFunc {
 	}
 }
 
-// Handles image uploads
-func UploadImage(db *sql.DB, uploadPath string) http.HandlerFunc {
+// Handles media uploads
+func UploadMedia(db *sql.DB, uploadPath string) http.HandlerFunc {
+
+	// REQUIREMENTS:
+	//
+	//	1 file at a time packed as "file" in form data
+	//	Type must be sent
+
 	return func(w http.ResponseWriter, req *http.Request) {
 		// Parse request form
 
@@ -42,33 +48,32 @@ func UploadImage(db *sql.DB, uploadPath string) http.HandlerFunc {
 
 		// Get request form values
 
-		imageName := req.FormValue("name")
-		imageDescription := req.FormValue("description")
+		mediaName := req.FormValue("name")
+		mediaDescription := req.FormValue("description")
 
-		_, imageFileHandle, err := req.FormFile("file")
+		_, mediaFileHandle, err := req.FormFile("file")
 		if err != nil {
 			common.RNRespond(
 				w,
-				fmt.Sprintf("Failed to obtain image file: %s", err),
+				fmt.Sprintf("Failed to obtain file handle: %s", err),
 				nil,
 				http.StatusBadRequest)
 
 			return
 		}
 
-		// Open image file
+		// Open file
 
-		file, err := imageFileHandle.Open()
+		file, err := mediaFileHandle.Open()
 		if err != nil {
 			common.RNRespond(
 				w,
-				fmt.Sprintf("Failed to open image file: %s", err),
+				fmt.Sprintf("Failed to open file: %s", err),
 				nil,
 				http.StatusBadRequest)
 
 			return
 		}
-
 		defer file.Close()
 
 		// Read first 512 bytes of the file to obtain MIME type
@@ -85,18 +90,28 @@ func UploadImage(db *sql.DB, uploadPath string) http.HandlerFunc {
 			return
 		}
 
-		// Ensure image upload is PNG, JPEG or HEIC
-		/* (Might support more later but these are most common ones!) */
+		// Check if uploaded media type is valid
 
-		allowedMimeTypes := []string{
+		allowedImageMimeTypes := []string{
 			"image/png",
 			"image/jpeg",
 			"image/heic",
 		}
 
+		allowedVideoMimeTypes := []string{
+			"video/quicktime",
+		}
+
+		allowed := append(allowedImageMimeTypes, allowedVideoMimeTypes...)
+
 		mimeType := mimetype.Detect(buf).String()
-		if !mimetype.EqualsAny(mimeType, allowedMimeTypes...) {
-			common.RNRespond(w, "Uploaded image must be PNG, JPG or HEIC", nil, http.StatusBadRequest)
+		if !mimetype.EqualsAny(mimeType, allowed...) {
+			common.RNRespond(
+				w,
+				"Uploaded file MIME type not recognized",
+				nil,
+				http.StatusBadRequest)
+
 			return
 		}
 
@@ -113,7 +128,7 @@ func UploadImage(db *sql.DB, uploadPath string) http.HandlerFunc {
 			return
 		}
 
-		// Create uploads dir
+		// Ensure uploads dir
 
 		err = os.MkdirAll(uploadPath, os.ModePerm)
 		if err != nil {
@@ -126,31 +141,30 @@ func UploadImage(db *sql.DB, uploadPath string) http.HandlerFunc {
 			return
 		}
 
-		// Create the image file
-		// Will be named the current unix nano time to uniqify
+		// Create file in server
+		// UNIX nano time name for uniqification
 
-		imageFilepath :=
+		mediaFilepath :=
 			fmt.Sprintf("%s/%d%s",
 				uploadPath,
 				time.Now().UnixNano(),
-				filepath.Ext(imageFileHandle.Filename))
-
-		imageFile, err := os.Create(imageFilepath)
+				filepath.Ext(mediaFileHandle.Filename))
+		mediaFile, err := os.Create(mediaFilepath)
 
 		if err != nil {
 			common.RNRespond(
 				w,
-				fmt.Sprintf("Failed to create image file: %s", err),
+				fmt.Sprintf("Failed to create media file: %s", err),
 				nil,
 				http.StatusInternalServerError)
 
 			return
 		}
-		defer imageFile.Close()
+		defer mediaFile.Close()
 
-		// Copy uploaded image data to image file
+		// Copy contents from form file to media file
 
-		_, err = io.Copy(imageFile, file)
+		_, err = io.Copy(mediaFile, file)
 		if err != nil {
 			common.RNRespond(
 				w,
@@ -161,42 +175,70 @@ func UploadImage(db *sql.DB, uploadPath string) http.HandlerFunc {
 			return
 		}
 
-		// Ensure image is PNG and of width 500
-		/* Want everything to be in same format for standardization;
-		PNG is ideal for web;
-		width 500 keeps things small but still clear enough for our purposes */
+		// Set the media type to insert into DB
+		// Do additional processing depending on MIME type
+		// Update mediaFilepath to reflect conversions
 
-		var pngImageFilepath string
+		var dbMediaType string
 
-		if mimeType != "image/png" {
-			// If did not already upload PNG, perform conversion
-			pngImageFilepath, err = ConvertToPNG(imageFile.Name())
+		if mimetype.EqualsAny(mimeType, allowedImageMimeTypes...) {
+			dbMediaType = common.DB_PHOTO_TYPE_STR
+
+			// Ensure image is PNG and resize width
+			//
+			// Want everything to be in same format for standardization;
+			// PNG is ideal for web
+			// Width ~500 keeps things small but still clear enough for our purposes */
+
+			if mimeType != "image/png" {
+				// If did not already upload PNG, perform conversion
+				mediaFilepath, err = ConvertToPNG(mediaFile.Name())
+				if err != nil {
+					common.RNRespond(
+						w,
+						fmt.Sprintf("Failed to convert image to PNG: %s", err),
+						nil,
+						http.StatusInternalServerError)
+
+					return
+				}
+
+				// Then do resize
+				mediaFilepath, _ = ResizePNG(mediaFilepath)
+			} else {
+				// Only resize if already PNG
+				mediaFilepath, _ = ResizePNG(mediaFile.Name())
+			}
+		} else if mimetype.EqualsAny(mimeType, allowedVideoMimeTypes...) {
+			dbMediaType = common.DB_VIDEO_TYPE_STR
+
+			// Resize and compress all uploaded video
+
+			mediaFilepath, err = ResizeAndCompressVideo(mediaFilepath)
 			if err != nil {
 				common.RNRespond(
 					w,
-					fmt.Sprintf("Failed to convert image to PNG: %s", err),
+					fmt.Sprintf("Failed to process video: %s", err),
 					nil,
 					http.StatusInternalServerError)
 
 				return
 			}
-
-			pngImageFilepath, _ = ResizePNG(pngImageFilepath)
-		} else {
-			// Only resize if already PNG
-			pngImageFilepath, _ = ResizePNG(imageFile.Name())
 		}
 
-		// Create image entry in DB
+		// Create entry in DB
 
 		_, err = db.Exec(`
-			INSERT INTO drawings (name, description, filename)
-			VALUES (?, ?, ?)	
-	`, imageName, imageDescription, filepath.Base(pngImageFilepath)) // Run insertion query
+			insert into media (name, description, filename, type) values (?, ?, ?, ?)`,
+			mediaName,
+			mediaDescription,
+			filepath.Base(mediaFilepath),
+			dbMediaType)
+
 		if err != nil {
 			common.RNRespond(
 				w,
-				fmt.Sprintf("Failed to insert image into DB: %s", err),
+				fmt.Sprintf("Failed to insert media into DB: %s", err),
 				nil,
 				http.StatusInternalServerError)
 
@@ -207,175 +249,7 @@ func UploadImage(db *sql.DB, uploadPath string) http.HandlerFunc {
 
 		common.RNRespond(
 			w,
-			fmt.Sprintf("Successfully uploaded and processed %s", pngImageFilepath),
-			nil,
-			http.StatusOK)
-	}
-}
-
-// Handles video uploads
-func UploadVideo(db *sql.DB, uploadPath string) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		// Parse request form
-
-		err := req.ParseMultipartForm(MAX_FORM_SIZE)
-		if err != nil {
-			common.RNRespond(w, fmt.Sprintf("Failed to parse form: %s", err), nil, http.StatusBadRequest)
-			return
-		}
-
-		// Get request form values
-
-		videoName := req.FormValue("name")
-		videoDescription := req.FormValue("description")
-
-		_, videoFileHandle, err := req.FormFile("file")
-		if err != nil {
-			common.RNRespond(
-				w,
-				fmt.Sprintf("Failed to obtain file handle: %s", err),
-				nil,
-				http.StatusBadRequest)
-
-			return
-		}
-
-		// Open
-
-		file, err := videoFileHandle.Open()
-		if err != nil {
-			common.RNRespond(
-				w,
-				fmt.Sprintf("Failed to open file: %s", err),
-				nil,
-				http.StatusBadRequest)
-
-			return
-		}
-
-		defer file.Close()
-
-		// Read first 512 bytes of the file to obtain MIME type
-
-		buf := make([]byte, 512)
-		_, err = file.Read(buf)
-		if err != nil {
-			common.RNRespond(
-				w,
-				fmt.Sprintf("Failed to read file MIME: %s", err),
-				nil,
-				http.StatusBadRequest)
-
-			return
-		}
-
-		// Only really gonna be uploading vids taken on iPhone
-		// .mov is Apple's thing; goes under QuickTime
-		// Might extend so leaving as array
-
-		allowedMimeTypes := []string{
-			"video/quicktime",
-		}
-
-		mimeType := mimetype.Detect(buf).String()
-		if !mimetype.EqualsAny(mimeType, allowedMimeTypes...) {
-			common.RNRespond(w, "Uploaded file must be MOV", nil, http.StatusBadRequest)
-			return
-		}
-
-		// Move read cursor to beginning of file
-
-		_, err = file.Seek(0, io.SeekStart)
-		if err != nil {
-			common.RNRespond(
-				w,
-				fmt.Sprintf("Failed to seek: %s", err),
-				nil,
-				http.StatusInternalServerError)
-
-			return
-		}
-
-		// Create uploads dir if not in already
-
-		err = os.MkdirAll(uploadPath, os.ModePerm)
-		if err != nil {
-			common.RNRespond(
-				w,
-				fmt.Sprintf("Failed to create uploads dir: %s", err),
-				nil,
-				http.StatusInternalServerError)
-
-			return
-		}
-
-		// Create the video file
-		// UNIX nano name
-
-		videoFilepath :=
-			fmt.Sprintf("%s/%d%s",
-				uploadPath,
-				time.Now().UnixNano(),
-				filepath.Ext(videoFileHandle.Filename))
-
-		videoFile, err := os.Create(videoFilepath)
-		if err != nil {
-			common.RNRespond(
-				w,
-				fmt.Sprintf("Failed to create image file: %s", err),
-				nil,
-				http.StatusInternalServerError)
-
-			return
-		}
-		defer videoFile.Close()
-
-		// Write file contents from form
-
-		_, err = io.Copy(videoFile, file)
-		if err != nil {
-			common.RNRespond(
-				w,
-				fmt.Sprintf("Failed to write file contents: %s", err),
-				nil,
-				http.StatusInternalServerError)
-
-			return
-		}
-
-		// Process the video
-
-		mp4VideoFilepath, err := ResizeAndCompressVideo(videoFilepath)
-		if err != nil {
-			common.RNRespond(
-				w,
-				fmt.Sprintf("Failed to process file: %s", err),
-				nil,
-				http.StatusInternalServerError)
-
-			return
-		}
-
-		// Create entry in DB
-		_, err = db.Exec(`
-			INSERT INTO skateclips (name, description, filename)
-			VALUES (?, ?, ?)	
-	`, videoName, videoDescription, filepath.Base(mp4VideoFilepath))
-		if err != nil {
-			common.RNRespond(
-				w,
-				fmt.Sprintf("Failed to insert image into DB: %s", err),
-				nil,
-				http.StatusInternalServerError)
-
-			return
-		}
-
-		// Success response
-
-		common.RNRespond(
-			w,
-			fmt.Sprintf("Successfully uploaded and processed %s", mp4VideoFilepath),
+			fmt.Sprintf("Successfully uploaded and processed media as %s", mediaFilepath),
 			nil,
 			http.StatusOK)
 	}
