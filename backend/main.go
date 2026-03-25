@@ -152,7 +152,7 @@ func main() {
 
 	// Setup upload handlers (auth-protected)
 
-	http.Handle("/api/upload", upload.UploadMedia(db, uploadPath))
+	http.Handle("/api/upload", authMiddleware(upload.UploadMedia(db, uploadPath)))
 
 	// Setup fetch handlers
 
