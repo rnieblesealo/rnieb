@@ -96,6 +96,65 @@ we should really upgrade to AS BUILDER pattern
 nginx frontend:
   since /api/ is proxied to backend, backend routes must be prefixed with /api/
 
+-- video processing working
+   pls separate folders
+
+
+!!! MORE CONCRETE PLANNING
+
+things i want to share:
+	* drawings/paintings
+	* skate clips ( john hill list thing )
+	* favorite music ( spotify api itunes thing )
+	* cool items i own ( minecraft inventory 3js thing )
+	* programming projects ( html fetcher thingy )
+	* drumming clips
+	* guitaring clips
+	* my music
+
+this would result in the following frontend pages
+	ART ( DRAWINGS / PAINTINGS )
+	SKATE
+	MUSIC ( MY FAVE / MY OWN  )
+	INVENTORY ( COOL ITEMS )
+	PUTERS ( PROGRAMMING )
+	DRUMS
+	GUITAR
+
+i will be uploading PHOTOS, VIDEO, and AUDIO
+	photo support is DONE
+	video support is ALMOST DONE
+	audio support is also ALMOST DONE
+	
+	media can share the same metadata
+		( name, description, filename )
+	this avoids repetition and keeps things easy to handle
+	if we wish to add stuff atop 
+		( say, i want a piece of media to be assoc'd to a skate trick in the list )
+	the media will be a FOREIGN KEY of what's atop it
+	( composition! )
+
+to keep things organized,
+in backend,
+save stuff as
+  /uploads
+    /photo
+    /video
+    /audio
+
+in database, should i have a table for each?
+the columns will be the same, which is redundant
+i think this will make queries be faster though
+still, it seems right to have one table and have an additional column media_type
+
+after consulting CLAUDE,
+having one table with type column is said to be best
+
+i agree
+
+* scale won't be enough to worry about slow queries
+* we also avoid having complexity of 3 tables with redundant columns
+
 === MULTIPART FORMS ======================================================================
 
 * essentially just data grouped by names
@@ -222,7 +281,7 @@ as such, we must DISABLE SANDBOXING to get pacman to work in docker
 this is still SECURE;
 the container is already a layer of sandboxing on its own!
 
-=== MYSQL ================================================================================
+=== DATABASE =============================================================================
 
 mysql is now MARIADB ( damn... )
 
@@ -236,6 +295,18 @@ mysqld_safe &               <---- start mysql server
 mysql -u root               <---- connect to mysql server as root
 
 ( didn't continue using, but have notes for fun! )
+
+( THE FOLLOWING ARE ON SQLITE )
+
+* INDEXES: collections of rows that share some column(s') value
+           help make queries faster by narrowing down search
+
+           e.g. we can create an index for a "type" column set to "video"
+                we can then query the index with more specificity instead of whole table
+                o(n) to o(n log n)!
+
+           select <-------------- will automatically use indices if created
+           explain query plan <-- can tell us if the select will use an index
 
 === MEBI VS MEGABYTES ====================================================================
 
