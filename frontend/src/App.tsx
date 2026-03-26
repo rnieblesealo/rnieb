@@ -207,49 +207,21 @@ export default function App() {
         <pre>{logo}</pre>
       </div>
 
-      {/* auth status */}
-      <div className="my-4 z-999">
-        {!loggedIn ?
-          // menu when NOT LOGGED 
-          <div className="flex flex-col items-center justify-center">
-            <form
-              onSubmit={handleLogin}
-              className="flex flex-col items-center justify-center text-center"
-            >
-              <span className="text-red-500 p-2">Not Logged In</span>
-              <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                className="w-full border border-red-900 hover:border-red-700 focus:border-red-500 px-2 py-1 my-1"
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="w-full border border-red-900 hover:border-red-700 focus:border-red-500 px-2 py-1 my-1"
-              />
-              <button
-                type="submit"
-                className="w-fit p-2 text-red-700 hover:text-red-600 active:text-red-500 text-shadow-red-600"
-              >
-                [ Log In ]
-              </button>
-            </form>
-          </div> :
-
-          // menu when LOGGED 
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-green-500 font-bold p-2">Logged In!</span>
-            <button
-              onClick={handleLogout}
-              className="w-fit p-2 text-red-700 hover:text-red-600 active:text-red-500 text-shadow-red-600"
-            >
-              [ Log Out ]
-            </button>
-          </div>
-        }
-      </div>
+      {/* navbar */}
+      <nav className="flex flex-row mb-8 mt-4 gap-1">
+        <button>
+          <img
+            src="/icons/btn-art.png"
+            className="w-28 rounded-sm"
+          />
+        </button>
+        <button>
+          <img
+            src="/icons/btn-skate.png"
+            className="w-28 rounded-sm"
+          />
+        </button>
+      </nav>
 
       {/* display images */}
       <div>
@@ -301,6 +273,50 @@ export default function App() {
           </form>
         </div>
       }
+
+      {/* auth status */}
+      <div className="mt-4 z-999">
+        {!loggedIn ?
+          // menu when NOT LOGGED 
+          <div className="flex flex-col items-center justify-center">
+            <form
+              onSubmit={handleLogin}
+              className="flex flex-col items-center justify-center text-center"
+            >
+              <span className="text-red-500 p-2">Not Logged In</span>
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                className="w-full border border-red-900 hover:border-red-700 focus:border-red-500 px-2 py-1 my-1"
+              />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                className="w-full border border-red-900 hover:border-red-700 focus:border-red-500 px-2 py-1 my-1"
+              />
+              <button
+                type="submit"
+                className="w-fit p-2 text-red-700 hover:text-red-600 active:text-red-500 text-shadow-red-600"
+              >
+                [ Log In ]
+              </button>
+            </form>
+          </div> :
+
+          // menu when LOGGED 
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-green-500 font-bold p-2">Logged In!</span>
+            <button
+              onClick={handleLogout}
+              className="w-fit p-2 text-red-700 hover:text-red-600 active:text-red-500 text-shadow-red-600"
+            >
+              [ Log Out ]
+            </button>
+          </div>
+        }
+      </div>
 
       {/* footer */}
       <footer className="w-fit h-fit">
