@@ -108,6 +108,31 @@ const Collage = ({ drawings, loggedIn, setDrawings }: CollageProps) => {
   )
 }
 
+interface NavButtonProps {
+  iconSrc: string
+}
+
+const NavButton = ({ iconSrc }: NavButtonProps) => {
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <button
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative overflow-hidden rounded-sm"
+    >
+      <img
+        src={iconSrc}
+        className="w-28 h-fit"
+        style={{
+          filter: hovered ? undefined : "saturate(0)"
+        }}
+      />
+      {/* gradient overlay on top for ios 6 look */}
+      <div className="bg-gradient-to-b from-white to-black opacity-30 w-full h-full absolute top-0" />
+    </button>
+  )
+}
 
 export default function App() {
   const [logo, setLogo] = useState('')
@@ -198,7 +223,7 @@ export default function App() {
       {/* fire skull bg */}
       <img
         src="frutiger-metro.png"
-        className="absolute w-128 h-auto top-0 right-0 opacity-60 z-1"
+        className="absolute w-128 h-auto top-0 right-0 opacity-60 z-0"
       />
 
       {/* ascii title */}
@@ -209,18 +234,8 @@ export default function App() {
 
       {/* navbar */}
       <nav className="flex flex-row mb-8 mt-4 gap-1">
-        <button>
-          <img
-            src="/icons/btn-art.png"
-            className="w-28 rounded-sm"
-          />
-        </button>
-        <button>
-          <img
-            src="/icons/btn-skate.png"
-            className="w-28 rounded-sm"
-          />
-        </button>
+        <NavButton iconSrc="/icons/btn-art.png" />
+        <NavButton iconSrc="/icons/btn-skate.png" />
       </nav>
 
       {/* display images */}
