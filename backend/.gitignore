@@ -22,3 +22,7 @@ server
 
 # no datadir
 **/*data/
+
+# no video files
+*.mov
+*.mp4

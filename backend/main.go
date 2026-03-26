@@ -139,6 +139,12 @@ func main() {
 	}
 	defer db.Close()
 
+	// Setup ping handler
+
+	http.HandleFunc("/api/ping", func(w http.ResponseWriter, req *http.Request) {
+		common.RNRespond(w, "Hi!", nil, http.StatusOK)
+	})
+
 	// Setup auth handlers
 
 	http.HandleFunc("/api/login", auth.Login(db))
@@ -146,15 +152,14 @@ func main() {
 
 	// Setup upload handlers (auth-protected)
 
-	http.Handle("/api/ping", upload.Ping("Marco? Polo!"))
-	http.Handle("/api/upload", authMiddleware(upload.Upload(db, uploadPath)))
+	http.Handle("/api/upload", authMiddleware(upload.UploadMedia(db, uploadPath)))
 
 	// Setup fetch handlers
 
-	http.HandleFunc("/api/get-drawings", fetch.GetDrawings(db))
-	http.Handle("/api/delete-drawing", authMiddleware(fetch.DeleteDrawing(db, uploadPath)))
+	http.HandleFunc("/api/get-drawings", fetch.GetAllMediaOfType(db, common.DB_PHOTO_TYPE_STR))
+	http.Handle("/api/delete-drawing", authMiddleware(fetch.DeleteMedia(db, uploadPath)))
 
-	// Setup image fileserver
+	// Setup fileserver
 
 	http.Handle("/api/uploads/", // Setup handler for uploads route
 		http.StripPrefix("/api/uploads/", // Strip this prefix from URL ( Leaves only filename )
