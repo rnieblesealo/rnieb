@@ -55,7 +55,7 @@ const Art = () => {
       {/* upload form */}
       {
         loggedIn &&
-        <div className="flex flex-col items-center justify-center text-red-500 mt-8">
+        <div className="flex flex-col items-center justify-center text-red-500 mt-4">
           <span className="m-2">Upload a Drawing</span>
           <form
             onSubmit={handleUploadForm}

@@ -63,15 +63,6 @@ export default function Layout() {
         <pre>{logo}</pre>
       </div>
 
-      {/* navbar */}
-      <nav className="flex flex-row mb-8 mt-4 gap-1">
-        <NavButton route="/art" iconSrc="/icons/btn-art.png" />
-        <NavButton route="/skate" iconSrc="/icons/btn-skate.png" />
-      </nav>
-
-      { /* page content */}
-      <Outlet />
-
       {/* auth status */}
       <div className="mt-4 z-999">
         {!loggedIn ?
@@ -102,7 +93,6 @@ export default function Layout() {
               </button>
             </form>
           </div> :
-
           // menu when LOGGED 
           <div className="flex flex-col items-center justify-center">
             <span className="text-green-500 font-bold p-2">Logged In!</span>
@@ -115,6 +105,15 @@ export default function Layout() {
           </div>
         }
       </div>
+
+      {/* navbar */}
+      <nav className="flex flex-row mb-8 mt-4 gap-1">
+        <NavButton route="/art" iconSrc="/icons/btn-art.png" />
+        <NavButton route="/skate" iconSrc="/icons/btn-skate.png" />
+      </nav>
+
+      { /* page content */}
+      <Outlet />
 
       {/* footer */}
       <footer className="w-fit h-fit">
