@@ -26,6 +26,8 @@
 [ ] xss attack?
 [x] delete keyword in typescript?
 [x] localstorage?
+[ ] at a low level how does routing work?
+[ ] what is fast refresh ( react )?
 
 === BRAINSTORM / SPEC ====================================================================
 
@@ -98,3 +100,22 @@ after we have the certs, we need to mount them to the container & configure ngin
   for this, our frontend container must expose port 443 ( https )
 
 this should be pretty much it!
+
+=== REACT ================================================================================
+
+* {children} is of type React.ReactNode
+
+CONTEXTS:
+  help avoid constantly passing down state
+
+  context itself = container for provider; holds no state
+  context provider = what is in the container; holds actual state
+
+    useContext is used to pull values from current provider
+
+    *** i don't understand why we need both, why not just store the state in the context?
+        WHY DO WE NEED A PROVIDER?
+
+        ...i guess it's like the blueprint-instance pattern 
+            context defines a blueprint ( set of values that context type provides ) 
+            the provider is an instance of that blueprint with mutable state 
