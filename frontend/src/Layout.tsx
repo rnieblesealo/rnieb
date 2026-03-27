@@ -65,8 +65,8 @@ export default function Layout() {
 
       {/* navbar */}
       <nav className="flex flex-row mb-8 mt-4 gap-1">
-        <NavButton iconSrc="/icons/btn-art.png" />
-        <NavButton iconSrc="/icons/btn-skate.png" />
+        <NavButton route="/art" iconSrc="/icons/btn-art.png" />
+        <NavButton route="/skate" iconSrc="/icons/btn-skate.png" />
       </nav>
 
       { /* page content */}

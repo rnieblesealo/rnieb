@@ -1,11 +1,14 @@
 import './index.css'
-import Art from './pages/Art'
-import AuthContextProvider from './context/AuthContextProvider'
-import Layout from './Layout'
-import axios from 'axios'
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import axios from 'axios'
+
+import AuthContextProvider from './context/AuthContextProvider'
+import Layout from './Layout'
+import Art from './pages/Art'
+import Skate from './pages/Skate'
 
 // pull and set auth token every reload
 // want this done before anything renders
@@ -31,7 +34,8 @@ createRoot(document.getElementById('root')!).render(
             doesn't take us to / again */}
 
             <Route index element={<Navigate to="/art" replace />} />
-            <Route path="art" element={<Art />} />
+            <Route path="/art" element={<Art />} />
+            <Route path="/skate" element={<Skate />} />
           </Route>
         </Routes>
       </BrowserRouter>
