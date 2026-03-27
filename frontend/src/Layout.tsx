@@ -63,6 +63,17 @@ export default function Layout() {
         <pre>{logo}</pre>
       </div>
 
+      {/* navbar */}
+      <nav className="grid grid-cols-3 sm:grid-cols-4 gap-1 mb-8 mt-4 w-fit mx-auto">
+        <NavButton route="/art" iconSrc="/icons/btn-art.png" />
+        <NavButton route="/skate" iconSrc="/icons/btn-skate.png" />
+        <NavButton route="/music" iconSrc="/icons/btn-music.png" />
+        <NavButton route="/programming" iconSrc="/icons/btn-programming.png" />
+      </nav>
+
+      { /* page content */}
+      <Outlet />
+
       {/* auth status */}
       <div className="mt-4 z-999">
         {!loggedIn ?
@@ -105,15 +116,6 @@ export default function Layout() {
           </div>
         }
       </div>
-
-      {/* navbar */}
-      <nav className="flex flex-row mb-8 mt-4 gap-1">
-        <NavButton route="/art" iconSrc="/icons/btn-art.png" />
-        <NavButton route="/skate" iconSrc="/icons/btn-skate.png" />
-      </nav>
-
-      { /* page content */}
-      <Outlet />
 
       {/* footer */}
       <footer className="w-fit h-fit">

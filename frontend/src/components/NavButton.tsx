@@ -13,7 +13,7 @@ const NavButton = ({ route, iconSrc }: NavButtonProps) => {
     <NavLink to={route}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative overflow-hidden rounded-sm"
+      className="relative overflow-hidden rounded-xl bg-black shadow-lg"
     >
       {/* isactive gets passed down by navlink to everything inside the ( );
           this is true whenever this is the active route */}
@@ -25,15 +25,16 @@ const NavButton = ({ route, iconSrc }: NavButtonProps) => {
         <>
           <img
             src={iconSrc}
-            className="w-28"
+            className="w-28 m-1 rounded-lg"
             style={{
-              filter: (hovered || isActive) ? undefined : "saturate(0)"
+              filter: (hovered || isActive) ? undefined : "saturate(0)",
+              imageRendering: "pixelated"
             }}
           />
           {/* gradient overlay on top for ios 6 look */}
           {isActive ?
-            <div className="bg-gradient-to-t from-white to-black opacity-30 w-full h-full absolute top-0" /> :
-            <div className="bg-gradient-to-b from-white to-black opacity-30 w-full h-full absolute top-0" />
+            <div className="bg-gradient-to-t from-white to-black opacity-20 w-full h-full absolute top-0" /> :
+            <div className="bg-gradient-to-b from-white to-black opacity-20 w-full h-full absolute top-0" />
           }
         </>
       )}

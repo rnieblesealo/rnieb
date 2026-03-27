@@ -9,6 +9,8 @@ import AuthContextProvider from './context/AuthContextProvider'
 import Layout from './Layout'
 import Art from './pages/Art'
 import Skate from './pages/Skate'
+import Music from './pages/Music'
+import Programming from './pages/Programming'
 
 // pull and set auth token every reload
 // want this done before anything renders
@@ -35,7 +37,10 @@ createRoot(document.getElementById('root')!).render(
 
             <Route index element={<Navigate to="/art" replace />} />
             <Route path="/art" element={<Art />} />
+
             <Route path="/skate" element={<Skate />} />
+            <Route path="/music" element={<Music />} />
+            <Route path="/programming" element={<Programming />} />
           </Route>
         </Routes>
       </BrowserRouter>
