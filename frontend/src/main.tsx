@@ -6,11 +6,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import axios from 'axios'
 
 import AuthContextProvider from './context/AuthContextProvider'
-import Layout from './Layout'
+import Layout from './layout/Layout'
 import Art from './pages/Art'
 import Skate from './pages/Skate'
 import Music from './pages/Music'
 import Programming from './pages/Programming'
+import Niko from './pages/Niko'
+import NotFoundLayout from './layout/NotFoundLayout'
 
 // pull and set auth token every reload
 // want this done before anything renders
@@ -41,7 +43,13 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/skate" element={<Skate />} />
             <Route path="/music" element={<Music />} />
             <Route path="/programming" element={<Programming />} />
+
           </Route>
+          {/* 404 displays niko game */}
+          <Route path="*" element={<NotFoundLayout />}>
+            <Route path="*" element={<Niko />} />
+          </Route>
+
         </Routes>
       </BrowserRouter>
 

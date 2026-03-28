@@ -156,6 +156,8 @@ Thank you for visiting :)
  / ::::::::::::: \                  =D-'
 (_________________) 
 
+  [ GENERAL ]
+
   * dockerizing an nginx frontend
   * nginx & configuring a container with it
       serving static files and handling actual routes ( $uri... )
@@ -165,6 +167,11 @@ Thank you for visiting :)
   * setting axios default headers
   * obtaining an ssl certificate & installing it to containerized nginx frontend
     ( certbot )
+
+  [ webassembly ]
+
+  * compiling c++ libraries and code into wasm using emscripten and cmake ( emcmake ) 
+    ...and using an iframe to display it in the site! 
 
 --- DEV SETUP ---------------------------------------------------------------------------
 
