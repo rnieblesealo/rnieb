@@ -1,8 +1,8 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { Outlet } from "react-router-dom"
-import NavButton from "./components/NavButton"
-import useAuthContext from "./context/useAuthContext"
+import NavButton from "../components/NavButton"
+import useAuthContext from "../context/useAuthContext"
 
 export default function Layout() {
   const { loggedIn, setLoggedIn } = useAuthContext()

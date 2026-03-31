@@ -28,6 +28,7 @@
 [x] localstorage?
 [ ] at a low level how does routing work?
 [ ] what is fast refresh ( react )?
+[ ]
 
 === BRAINSTORM / SPEC ====================================================================
 
@@ -119,3 +120,34 @@ CONTEXTS:
         ...i guess it's like the blueprint-instance pattern 
             context defines a blueprint ( set of values that context type provides ) 
             the provider is an instance of that blueprint with mutable state 
+
+=== WORKING WITH WASM ====================================================================
+
+TO COMPILE A C++ RAYLIB APP TO WASM:
+    ( from my notes; might need some extra reading up on and just shows gen process )
+
+  1. install emscripten ( brew install emsripten, what have you )
+  2. COMPILE RAYLIB FOR WASM:
+      a. clone raylib source
+      b. go to /src
+      c. change platform to web and set output dir to /web ( or whatever is convenient )
+      d. run $ make PLATFORM=PLATFORM_WEB -B 
+
+      we will get a .a file that is the wasm version of raylib
+  3. POINT OUR GAME'S CMAKE TO THIS
+      a. set raylib_DIR to wherever raylib is ( .local/ is a good, user-scoped place )
+      b. target_link_libraries the raylib wasm object ( ...the .a object from step 1 )
+      c. target_include_dirs the raylib headers
+      d. set appropriate compiler flags
+          don't forget to bundle the game data! browser has no idea of your filesystem
+  4. BUILD AND RUN:
+      a. FROM YOUR GAME, make a build folder for the web version ( if u want ); cd into it
+      b. run $ emcmake cmake .. <--- to configure
+      c. run $ emmake make      <--- to build
+      
+      you will get some .html, wasm files; they are ready 
+
+      run $ npx serve <---- where .html is and run it in browser
+        ( browser blocks loading wasm unless a server is running )
+
+  5. present the game using an iframe 
