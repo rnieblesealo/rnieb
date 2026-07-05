@@ -1,3 +1,6 @@
+# frontend gets built inside build container ( residual build items stay here ) 
+# ...build OUTPUTS go to final container ( where frontend will run )
+
 # build container
 FROM node:20-alpine AS builder
 WORKDIR /app
