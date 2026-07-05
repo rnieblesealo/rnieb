@@ -1,18 +1,12 @@
 FROM lopsided/archlinux:devel
 
-# working directory inside container
+# our working directory inside container is:
 WORKDIR /app
 
-# sync mirrors 
-# update system packs
-# install my deps
-
-# run as one command; sy step might be cached which causes -s to fail 
-# ( no sync took place )
 RUN  \
-  pacman -Sy --noconfirm --disable-sandbox && \
-  pacman -Su --noconfirm --disable-sandbox && \
-  pacman -S --noconfirm --disable-sandbox \
+  pacman -Sy  --noconfirm --needed archlinux-keyring --disable-sandbox && \
+  pacman -Su  --noconfirm --disable-sandbox && \
+  pacman -S   --noconfirm --disable-sandbox \
   go \
   gcc \
   pkg-config \
@@ -26,11 +20,17 @@ RUN  \
   libx264 \ 
   sqlite
 
-# copy go files first for better layer caching
+# breakdown of this RUN:
+#
+# update arch master keys ( CRUCIAL TO PREVENT SIGNING ERRORS )& sync package db 
+# upgrade system packages 
+# install our dependencies
+
+# install go modules first for better docker layer caching:
 COPY go.mod go.sum ./
 RUN go mod download
 
-# copy all source code
+# copy source: 
 COPY . .
 
 # build & run
